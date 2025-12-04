@@ -1,7 +1,12 @@
 <template>
-  <header class="head-bar">
+  <header class="head-bar" :class="{ 'head-bar--scrolled': isScrolled }">
     <div class="head-bar__inner page-shell">
       <button class="head-bar__brand" type="button" @click="goHome">
+        <FontAwesomeIcon
+          :icon="['fab', 'vuejs']"
+          class="head-bar__brand-icon"
+          aria-hidden="true"
+        />
         PB<span>neteflix</span>
       </button>
 
@@ -28,13 +33,19 @@
           class="head-bar__link"
           :to="item.to"
         >
-          {{ item.label }}
+          <FontAwesomeIcon :icon="item.icon" class="head-bar__link-icon" aria-hidden="true" />
+          <span>{{ item.label }}</span>
         </RouterLink>
       </nav>
 
       <div class="head-bar__actions" :class="{ 'head-bar__actions--open': isMenuOpen }">
         <span v-if="isAuthenticated" class="head-bar__user">
-          {{ userId }}
+          <FontAwesomeIcon
+            :icon="['fas', 'user']"
+            class="head-bar__user-icon"
+            aria-hidden="true"
+          />
+          <span class="head-bar__user-text">{{ userId }}</span>
         </span>
         <button
           v-if="isAuthenticated"
@@ -42,7 +53,12 @@
           class="head-bar__button head-bar__button--ghost"
           @click="handleLogout"
         >
-          Logout
+          <FontAwesomeIcon
+            :icon="['fas', 'right-from-bracket']"
+            class="head-bar__button-icon"
+            aria-hidden="true"
+          />
+          <span>Logout</span>
         </button>
         <button
           v-else
@@ -59,16 +75,23 @@
             :aria-pressed="theme === 'light'"
             @click="toggleTheme"
           >
-            {{ themeLabel }}
+            <FontAwesomeIcon :icon="themeIcon" class="head-bar__button-icon" aria-hidden="true" />
+            <span>{{ themeLabel }}</span>
           </button>
           <div class="font-controls" role="group" aria-label="글자 크기 조절">
+            <FontAwesomeIcon
+              :icon="['fas', 'font']"
+              class="font-controls__icon"
+              aria-hidden="true"
+            />
             <button
               type="button"
               class="head-bar__button head-bar__button--muted"
               aria-label="글자 크기 축소"
               @click="decrease"
             >
-              A-
+              <FontAwesomeIcon :icon="['fas', 'minus']" aria-hidden="true" />
+              <span class="sr-only">-</span>
             </button>
             <span class="font-label">{{ fontScaleLabel }}</span>
             <button
@@ -77,7 +100,8 @@
               aria-label="글자 크기 확대"
               @click="increase"
             >
-              A+
+              <FontAwesomeIcon :icon="['fas', 'plus']" aria-hidden="true" />
+              <span class="sr-only">+</span>
             </button>
           </div>
           <button
@@ -86,7 +110,8 @@
             :aria-pressed="isMotionReduced"
             @click="toggleMotion"
           >
-            {{ motionLabel }}
+            <FontAwesomeIcon :icon="motionIcon" class="head-bar__button-icon" aria-hidden="true" />
+            <span>{{ motionLabel }}</span>
           </button>
         </div>
       </div>
@@ -95,7 +120,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { getCurrentUserId, logout } from '@/services/auth'
@@ -106,18 +131,27 @@ import { useFontScale } from '@/composables/useFontScale'
 const router = useRouter()
 const userId = ref<string | null>(getCurrentUserId())
 const isMenuOpen = ref(false)
+const isScrolled = ref(false)
 
 const navItems = [
-  { to: '/', label: 'Home' },
-  { to: '/popular', label: 'Popular' },
-  { to: '/search', label: 'Search' },
-  { to: '/wishlist', label: 'Wishlist' },
+  { to: '/', label: 'Home', icon: ['fas', 'house'] as const },
+  { to: '/popular', label: 'Popular', icon: ['fas', 'fire'] as const },
+  { to: '/search', label: 'Search', icon: ['fas', 'magnifying-glass'] as const },
+  { to: '/wishlist', label: 'Wishlist', icon: ['fas', 'heart'] as const },
 ]
 
 const isAuthenticated = computed(() => userId.value !== null)
 const { isMotionReduced, toggleMotion, motionLabel } = useMotionPreference()
 const { theme, toggleTheme, themeLabel } = useTheme()
 const { increase, decrease, fontScaleLabel } = useFontScale()
+const themeIcon = computed(() =>
+  theme.value === 'light' ? (['fas', 'sun'] as const) : (['fas', 'moon'] as const),
+)
+const motionIcon = computed(() =>
+  isMotionReduced.value
+    ? (['fas', 'circle-half-stroke'] as const)
+    : (['fas', 'wand-magic-sparkles'] as const),
+)
 
 watch(
   () => router.currentRoute.value.fullPath,
@@ -127,6 +161,20 @@ watch(
   },
   { immediate: true },
 )
+
+function updateScrollState() {
+  const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
+  isScrolled.value = scrollTop > 30
+}
+
+onMounted(() => {
+  updateScrollState()
+  window.addEventListener('scroll', updateScrollState, { passive: true })
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', updateScrollState)
+})
 
 function goHome() {
   router.push('/')
@@ -155,6 +203,22 @@ function handleLogout() {
   background: linear-gradient(180deg, rgba(3, 7, 18, 0.85), rgba(3, 7, 18, 0.2));
   backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease,
+    transform 0.3s ease;
+  will-change: background-color, border-color, box-shadow, transform;
+}
+
+.head-bar--scrolled {
+  background: rgba(3, 7, 18, 0.92);
+  border-color: rgba(148, 163, 184, 0.3);
+  box-shadow: 0 12px 40px rgba(2, 6, 23, 0.4);
+  transform: translateZ(0);
+}
+
+[data-theme='light'] .head-bar--scrolled {
+  background: rgba(248, 250, 252, 0.95);
+  border-color: rgba(15, 23, 42, 0.2);
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.15);
 }
 
 .head-bar__inner {
@@ -166,8 +230,8 @@ function handleLogout() {
 
 .head-bar__brand {
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.15rem;
+  align-items: center;
+  gap: 0.4rem;
   font-size: 1.45rem;
   font-weight: 700;
   color: var(--color-accent);
@@ -181,6 +245,10 @@ function handleLogout() {
   color: #fff;
   font-size: 0.9rem;
   letter-spacing: 0.1em;
+}
+
+.head-bar__brand-icon {
+  font-size: 1.2rem;
 }
 
 .head-bar__menu {
@@ -215,12 +283,19 @@ function handleLogout() {
 }
 
 .head-bar__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   color: #d1d5db;
   font-size: 0.85rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   position: relative;
   will-change: color;
+}
+
+.head-bar__link-icon {
+  font-size: 0.85rem;
 }
 
 .head-bar__link.router-link-active::after,
@@ -249,10 +324,20 @@ function handleLogout() {
 .head-bar__user {
   font-size: 0.85rem;
   color: var(--color-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.head-bar__user-text {
   max-width: 140px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.head-bar__user-icon {
+  color: var(--color-accent);
 }
 
 [data-theme='light'] .head-bar__user {
@@ -269,6 +354,9 @@ function handleLogout() {
   cursor: pointer;
   transition: opacity 0.2s ease;
   will-change: opacity, transform;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .head-bar__button:hover {
@@ -276,16 +364,19 @@ function handleLogout() {
 }
 
 .head-bar__button--ghost {
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.4);
+  background: rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(248, 250, 252, 0.4);
+  color: #f8fafc;
+  padding: 0.4rem 1.1rem;
 }
 
 .head-bar__button--muted {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #e5e5e5;
-  font-size: 0.8rem;
-  padding: 0.35rem 0.9rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  color: #f3f4f6;
+  font-size: 0.75rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.6rem;
 }
 
 .head-bar__toggles {
@@ -301,9 +392,39 @@ function handleLogout() {
   gap: 0.25rem;
 }
 
-.font-label {
-  font-size: 0.8rem;
+.font-controls__icon {
   color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+.head-bar__button-icon {
+  font-size: 0.85rem;
+}
+
+.font-label {
+  font-size: 0.75rem;
+  color: var(--color-muted);
+}
+
+.font-controls .head-bar__button--muted {
+  font-size: 0.7rem;
+  padding: 0.18rem 0.5rem;
+  border-radius: 0.5rem;
+}
+
+[data-theme='light'] .head-bar__button--ghost {
+  background: rgba(248, 250, 252, 0.9);
+  color: #0f172a;
+  border-color: rgba(15, 23, 42, 0.2);
+}
+
+[data-theme='light'] .head-bar__button--muted {
+  border-color: rgba(15, 23, 42, 0.25);
+  color: #0f172a;
+}
+
+[data-theme='light'] .font-label {
+  color: rgba(15, 23, 42, 0.7);
 }
 
 @media (max-width: 900px) {
