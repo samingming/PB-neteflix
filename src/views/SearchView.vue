@@ -283,6 +283,17 @@ function selectHistory(term: string) {
   color: #e5e5e5;
 }
 
+[data-theme='light'] .field input,
+[data-theme='light'] .field select {
+  background: #fff;
+  border-color: rgba(15, 23, 42, 0.2);
+  color: #111827;
+}
+
+[data-theme='light'] .field select option {
+  color: #111827;
+}
+
 .search-input-wrap {
   display: flex;
   gap: 0.5rem;
@@ -290,6 +301,10 @@ function selectHistory(term: string) {
 
 .search-input-wrap input {
   flex: 1;
+}
+
+[data-theme='light'] .search-input-wrap input::placeholder {
+  color: rgba(15, 23, 42, 0.6);
 }
 
 .search-btn {
@@ -315,6 +330,10 @@ function selectHistory(term: string) {
   justify-content: space-between;
   margin-top: var(--space-md);
   gap: var(--space-sm);
+}
+
+[data-theme='light'] .result-info {
+  color: #0f172a;
 }
 
 .reset-btn {
@@ -400,6 +419,25 @@ function selectHistory(term: string) {
 .hint-text {
   font-size: 0.9rem;
   color: var(--color-muted);
+}
+
+[data-theme='light'] .field {
+  color: #0f172a;
+}
+
+[data-theme='light'] .reset-btn {
+  border-color: rgba(15, 23, 42, 0.45);
+  color: #0f172a;
+}
+
+[data-theme='light'] .history-label,
+[data-theme='light'] .clear-history {
+  color: #0f172a;
+}
+
+[data-theme='light'] .history-chip {
+  border-color: rgba(15, 23, 42, 0.35);
+  color: #0f172a;
 }
 
 @media (max-width: 900px) {

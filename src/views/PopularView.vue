@@ -346,6 +346,11 @@ onBeforeUnmount(() => {
   background: rgba(15, 23, 42, 0.8);
 }
 
+[data-theme='light'] .movie-table th {
+  color: #0f172a;
+  background: rgba(226, 232, 240, 0.9);
+}
+
 .row-clickable {
   cursor: pointer;
 }
