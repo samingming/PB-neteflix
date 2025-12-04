@@ -1,16 +1,18 @@
-<!-- src/App.vue -->
+<!-- App.vue -->
 <template>
-  <div id="app">
-    <!-- /signin 페이지가 아니면 헤더 표시 -->
+  <div id="app" class="app-shell">
     <HeaderBar v-if="showHeader" />
 
-    <RouterView v-slot="{ Component }">
-      <transition name="route-fade" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </RouterView>
+    <main class="app-main">
+      <RouterView v-slot="{ Component }">
+        <transition name="route-fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </RouterView>
+    </main>
   </div>
 </template>
+
 
 <script setup lang="ts">
 import { computed } from 'vue'

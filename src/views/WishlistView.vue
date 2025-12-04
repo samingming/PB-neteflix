@@ -1,202 +1,183 @@
 <template>
-  <main class="wishlist-page">
+  <main class="wishlist-page page-shell">
     <header class="page-header">
-      <h1>내가 찜한 리스트</h1>
+      <p class="page-eyebrow">My Collection</p>
+      <h1>위시리스트</h1>
       <p class="page-subtitle">
-        추천(위시리스트)에 등록한 영화들을 한 눈에 확인할 수 있습니다.
+        관심 있는 영화를 저장해 두면 어느 기기에서든 동일한 목록을 볼 수 있어요.
       </p>
     </header>
 
-    <section class="content">
+    <section class="panel wishlist-panel">
       <p v-if="!wishlist.length" class="empty-text">
-        아직 찜한 영화가 없습니다. 홈 또는 대세 콘텐츠에서 영화를 클릭해
-        추천 목록에 추가해 보세요.
+        아직 추가한 영화가 없습니다. 홈, 인기, 검색 페이지에서 마음에 드는 작품을
+        <strong>Wishlist</strong> 버튼으로 저장해 보세요.
       </p>
 
-      <div v-else>
-        <table class="movie-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>포스터</th>
-              <th>제목</th>
-              <th>액션</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(movie, index) in wishlist"
-              :key="movie.id"
-              class="row"
-            >
-              <td>{{ index + 1 }}</td>
-              <td>
-                <div class="thumb">
-                  <img
-                    v-if="movie.poster_path"
-                    :src="getPosterUrl(movie.poster_path)"
-                    :alt="movie.title"
-                  />
-                  <div v-else class="thumb-placeholder">No Image</div>
-                </div>
-              </td>
-              <td class="title-cell">
-                {{ movie.title }}
-              </td>
-              <td>
-                <button
-                  type="button"
-                  class="remove-btn"
-                  @click="handleRemove(movie.id)"
-                >
-                  찜 해제
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div v-else class="wishlist-grid">
+        <article
+          v-for="movie in wishlist"
+          :key="movie.id"
+          class="wishlist-card"
+        >
+          <img
+            v-if="movie.poster_path"
+            :src="getPosterUrl(movie.poster_path)"
+            :alt="movie.title"
+            loading="lazy"
+          />
+          <div v-else class="wishlist-card__placeholder">No Image</div>
 
-        <p class="info-text">
-          이 페이지의 데이터는 브라우저 Local Storage에 저장되어 있습니다.
-          다른 페이지에서 영화를 클릭하면 이 리스트에 추가되거나 제거됩니다.
-        </p>
+          <div class="wishlist-card__body">
+            <div>
+              <h3>{{ movie.title }}</h3>
+              <p class="wishlist-card__meta">TMDB #{{ movie.id }}</p>
+            </div>
+            <button type="button" class="remove-btn" @click="handleRemove(movie.id)">
+              제거
+            </button>
+          </div>
+        </article>
       </div>
+
+      <p v-if="wishlist.length" class="info-text">
+        위시리스트는 브라우저 Local Storage에 저장되며 같은 브라우저에서는 자동으로 동기화됩니다.
+      </p>
     </section>
   </main>
 </template>
 
 <script setup lang="ts">
 import { useWishlist } from '@/composables/useWishlist'
+import type { TmdbMovie } from '@/services/tmdb'
 
 const { wishlist, toggleWishlist } = useWishlist()
 
 function getPosterUrl(path: string | null) {
-  if (!path) return ''
-  return `https://image.tmdb.org/t/p/w200${path}`
+  return path ? `https://image.tmdb.org/t/p/w300${path}` : ''
 }
 
-function handleRemove(id: number) {
-  const found = wishlist.value.find((m) => m.id === id)
-  if (!found) return
-  toggleWishlist({
-    id: found.id,
-    title: found.title,
-    poster_path: found.poster_path,
-    // toggleWishlist는 TmdbMovie 타입을 받게 되어 있어서
-    // 사용하지 않는 필드는 그냥 undefined로 둬도 됨
+function handleRemove(movieId: number) {
+  const movie = wishlist.value.find((item) => item.id === movieId)
+  if (!movie) return
+
+  const payload: TmdbMovie = {
+    id: movie.id,
+    title: movie.title,
+    poster_path: movie.poster_path,
     overview: '',
-  } as any)
+  }
+  toggleWishlist(payload)
 }
 </script>
 
 <style scoped>
 .wishlist-page {
-  min-height: 100vh;
-  background: #000;
-  color: #fff;
-  padding: 1.5rem 1rem 3rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
 }
 
-.page-header {
-  margin-bottom: 1rem;
-}
 .page-header h1 {
-  font-size: 1.6rem;
-  margin-bottom: 0.25rem;
-}
-.page-subtitle {
-  font-size: 0.9rem;
-  color: #9ca3af;
+  margin: 0.3rem 0 0;
 }
 
-.content {
-  margin-top: 0.5rem;
+.page-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-muted);
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.page-subtitle {
+  color: var(--color-muted);
+  margin: 0.4rem 0 0;
 }
 
 .empty-text {
-  margin-top: 2rem;
+  margin: 1rem 0 0;
   font-size: 0.95rem;
-  color: #9ca3af;
+  color: var(--color-muted);
 }
 
-/* 테이블 */
-.movie-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  margin-top: 0.5rem;
-}
-.movie-table th,
-.movie-table td {
-  padding: 0.6rem;
-  border-bottom: 1px solid rgba(55, 65, 81, 0.7);
-  text-align: left;
-}
-.movie-table th {
-  font-weight: 600;
-  color: #e5e5e5;
-  background: rgba(15, 23, 42, 0.9);
-}
-.row:hover {
-  background: rgba(30, 64, 175, 0.3);
+.wishlist-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
 }
 
-.thumb {
-  width: 50px;
-  height: 75px;
-  border-radius: 4px;
+.wishlist-card {
+  background: var(--color-card);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.wishlist-card img,
+.wishlist-card__placeholder {
+  width: 100%;
+  height: 320px;
+  object-fit: cover;
   background: #111827;
 }
-.thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.thumb-placeholder {
-  width: 100%;
-  height: 100%;
-  font-size: 0.65rem;
+
+.wishlist-card__placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
 }
-.title-cell {
-  max-width: 260px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+
+.wishlist-card__body {
+  padding: var(--space-md);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.wishlist-card__body h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.wishlist-card__meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.85rem;
+  color: var(--color-muted);
 }
 
 .remove-btn {
   border-radius: 999px;
   border: none;
-  background: #e50914;
+  background: var(--color-accent);
   color: #fff;
-  font-size: 0.8rem;
-  padding: 0.3rem 0.9rem;
+  font-size: 0.85rem;
+  padding: 0.35rem 1.1rem;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
 .remove-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(229, 9, 20, 0.5);
+  box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
 }
 
 .info-text {
-  margin-top: 0.75rem;
-  font-size: 0.8rem;
-  color: #9ca3af;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: var(--color-muted);
 }
 
-/* 반응형 */
-@media (max-width: 768px) {
-  .movie-table th:nth-child(1),
-  .movie-table td:nth-child(1) {
-    display: none;
+@media (max-width: 640px) {
+  .wishlist-card img,
+  .wishlist-card__placeholder {
+    height: 260px;
   }
 }
 </style>

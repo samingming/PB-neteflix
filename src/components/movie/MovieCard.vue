@@ -36,9 +36,7 @@ const emit = defineEmits<{
 }>()
 
 const posterUrl = computed(() =>
-  props.movie.poster_path
-    ? `https://image.tmdb.org/t/p/w500${props.movie.poster_path}`
-    : null,
+  props.movie.poster_path ? `https://image.tmdb.org/t/p/w500${props.movie.poster_path}` : null,
 )
 
 function onClick() {
@@ -49,72 +47,85 @@ function onClick() {
 <style scoped>
 .movie-card {
   position: relative;
-  width: 140px;
+  width: 100%;
+  min-width: 140px;
   cursor: pointer;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
-  margin-right: 0.75rem;
+  border-radius: 1rem;
 }
+
 .poster-wrap {
-  border-radius: 8px;
+  border-radius: 1rem;
   overflow: hidden;
-  background: #222;
+  background: #111827;
+  aspect-ratio: 2 / 3;
 }
+
 .poster-wrap img {
   display: block;
   width: 100%;
-  height: 210px;
+  height: 100%;
   object-fit: cover;
   transition: transform 0.25s ease;
 }
+
 .poster-placeholder {
   width: 100%;
-  height: 210px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #777;
   font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
 }
 
 .movie-card:hover {
-  transform: translateY(-6px) scale(1.05);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
 }
+
 .movie-card:hover img {
-  transform: scale(1.08);
+  transform: scale(1.05);
 }
 
 .movie-info {
-  margin-top: 0.4rem;
-  font-size: 0.8rem;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
   color: #e5e5e5;
 }
+
 .title {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   margin-bottom: 0.1rem;
 }
+
 .meta {
-  font-size: 0.7rem;
-  color: #aaa;
+  font-size: 0.75rem;
+  color: #9ca3af;
 }
 
-/* 추천된 영화 스타일 */
 .movie-card--wish::after {
-  content: '★';
+  content: 'WL';
   position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 22px;
-  height: 22px;
+  top: 0.6rem;
+  right: 0.6rem;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
-  background: #e50914;
+  background: var(--color-accent);
   color: #fff;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 6px 20px rgba(229, 9, 20, 0.35);
 }
-.movie-card--wish {
-  outline: 2px solid #e50914;
+
+@media (max-width: 640px) {
+  .movie-card {
+    min-width: unset;
+  }
 }
 </style>

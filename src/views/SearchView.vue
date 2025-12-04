@@ -1,34 +1,34 @@
 <template>
-  <main class="search-page">
+  <main class="search-page page-shell">
     <header class="page-header">
-      <h1>찾아보기</h1>
-      <p class="page-subtitle">
-        검색어와 필터를 조합해서 원하는 영화를 찾아보세요.
-      </p>
+      <div>
+        <p class="page-eyebrow">Search & Filter</p>
+        <h1>원하는 영화를 찾아보세요</h1>
+        <p class="page-subtitle">
+          키워드, 장르, 평점, 정렬까지 조건에 맞는 작품을 바로 확인할 수 있습니다.
+        </p>
+      </div>
     </header>
 
-    <!-- 검색/필터 바 -->
-    <section class="filter-bar">
-      <div class="filter-row">
-        <!-- 검색어 -->
-        <div class="field">
-          <label>검색어</label>
+    <section class="panel filter-bar">
+      <div class="filter-grid">
+        <label class="field">
+          <span>검색어</span>
           <div class="search-input-wrap">
             <input
               v-model="searchQuery"
-              type="text"
-              placeholder="영화 제목을 검색하세요"
+              type="search"
+              placeholder="영화 제목, 키워드..."
               @keyup.enter="handleSearch"
             />
             <button type="button" class="search-btn" @click="handleSearch">
               검색
             </button>
           </div>
-        </div>
+        </label>
 
-        <!-- 장르 -->
-        <div class="field">
-          <label>장르</label>
+        <label class="field">
+          <span>장르</span>
           <select v-model.number="selectedGenreId">
             <option :value="0">전체</option>
             <option
@@ -39,44 +39,41 @@
               {{ genre.name }}
             </option>
           </select>
-        </div>
+        </label>
 
-        <!-- 최소 평점 -->
-        <div class="field">
-          <label>최소 평점</label>
+        <label class="field">
+          <span>최소 평점</span>
           <select v-model.number="minRating">
             <option :value="0">전체</option>
             <option :value="5">5.0 이상</option>
             <option :value="7">7.0 이상</option>
             <option :value="8">8.0 이상</option>
           </select>
-        </div>
+        </label>
 
-        <!-- 정렬 -->
-        <div class="field">
-          <label>정렬</label>
+        <label class="field">
+          <span>정렬 방식</span>
           <select v-model="sortOption">
-            <option value="popularityDesc">인기순 (내림차순)</option>
+            <option value="popularityDesc">인기 순</option>
             <option value="ratingDesc">평점 높은 순</option>
             <option value="ratingAsc">평점 낮은 순</option>
-            <option value="dateDesc">개봉일 최신 순</option>
-            <option value="dateAsc">개봉일 오래된 순</option>
+            <option value="dateDesc">최신 개봉 순</option>
+            <option value="dateAsc">오래된 순</option>
           </select>
-        </div>
+        </label>
       </div>
 
-      <div class="filter-row bottom-row">
+      <div class="filter-footer">
         <button type="button" class="reset-btn" @click="resetFilters">
           필터 초기화
         </button>
         <span class="result-info" v-if="!loading && filteredMovies.length">
-          총 {{ filteredMovies.length }}개 결과 (원본 {{ rawMovies.length }}개에서 필터링)
+          총 {{ filteredMovies.length }}편 (검색 결과 {{ rawMovies.length }}편)
         </span>
       </div>
     </section>
 
-    <!-- 결과 영역 -->
-    <section class="results-section">
+    <section class="panel results-section">
       <LoaderSpinner v-if="loading" />
 
       <p v-else-if="error" class="error-text">
@@ -87,14 +84,14 @@
         v-else-if="!filteredMovies.length && searchPerformed"
         class="empty-text"
       >
-        조건에 맞는 영화가 없습니다. 검색어 또는 필터를 변경해보세요.
+        조건에 맞는 결과가 없습니다. 검색어나 필터를 조정해 보세요.
       </p>
 
       <p
         v-else-if="!filteredMovies.length && !searchPerformed"
         class="hint-text"
       >
-        검색어를 입력하고 검색 버튼을 눌러보세요.
+        TMDB에서 제공하는 수만 편의 영화를 검색해 보세요.
       </p>
 
       <div v-else class="movie-grid">
@@ -122,28 +119,24 @@ import {
 } from '@/services/tmdb'
 import { useWishlist } from '@/composables/useWishlist'
 
-// 검색 상태
 const searchQuery = ref('')
 const rawMovies = ref<TmdbMovie[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
 const searchPerformed = ref(false)
 
-// 장르/필터 상태
 const genres = ref<TmdbGenre[]>([])
-const selectedGenreId = ref<number>(0) // 0: 전체
-const minRating = ref<number>(0) // 0: 전체
+const selectedGenreId = ref<number>(0)
+const minRating = ref<number>(0)
 const sortOption = ref<'popularityDesc' | 'ratingDesc' | 'ratingAsc' | 'dateDesc' | 'dateAsc'>(
   'popularityDesc',
 )
 
-// 위시리스트
 const { toggleWishlist, isInWishlist } = useWishlist()
 
-// TMDB 검색 호출
 async function handleSearch() {
   if (!searchQuery.value.trim()) {
-    error.value = '검색어를 입력해주세요.'
+    error.value = '검색어를 입력해 주세요.'
     searchPerformed.value = false
     rawMovies.value = []
     return
@@ -158,39 +151,30 @@ async function handleSearch() {
     rawMovies.value = res.results
   } catch (err) {
     console.error(err)
-    error.value = '영화 검색 중 오류가 발생했습니다.'
+    error.value = '검색에 실패했습니다. 잠시 후 다시 시도해 주세요.'
     rawMovies.value = []
   } finally {
     loading.value = false
   }
 }
 
-// 필터 초기화
 function resetFilters() {
   selectedGenreId.value = 0
   minRating.value = 0
   sortOption.value = 'popularityDesc'
 }
 
-// 필터링 + 정렬된 결과
 const filteredMovies = computed<TmdbMovie[]>(() => {
   let list = [...rawMovies.value]
 
-  // 장르 필터
   if (selectedGenreId.value !== 0) {
-    list = list.filter((movie) =>
-      movie.genre_ids?.includes(selectedGenreId.value),
-    )
+    list = list.filter((movie) => movie.genre_ids?.includes(selectedGenreId.value))
   }
 
-  // 최소 평점 필터
   if (minRating.value > 0) {
-    list = list.filter(
-      (movie) => (movie.vote_average ?? 0) >= minRating.value,
-    )
+    list = list.filter((movie) => (movie.vote_average ?? 0) >= minRating.value)
   }
 
-  // 정렬
   list.sort((a, b) => {
     const ratingA = a.vote_average ?? 0
     const ratingB = b.vote_average ?? 0
@@ -208,9 +192,6 @@ const filteredMovies = computed<TmdbMovie[]>(() => {
         return dateA - dateB
       case 'popularityDesc':
       default:
-        // TMDB search 결과에는 popularity 필드도 있지만,
-        // 여기서는 안전하게 vote_count 기준으로 대충 섞인 상태를 유지하거나
-        // 그냥 원본 순서를 유지해도 됨.
         return 0
     }
   })
@@ -218,7 +199,6 @@ const filteredMovies = computed<TmdbMovie[]>(() => {
   return list
 })
 
-// 초기 장르 목록 가져오기
 onMounted(async () => {
   try {
     genres.value = await fetchGenres()
@@ -230,140 +210,145 @@ onMounted(async () => {
 
 <style scoped>
 .search-page {
-  min-height: 100vh;
-  background: #000;
-  color: #fff;
-  padding: 1.5rem 1rem 3rem;
-  max-width: 1200px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-lg);
 }
 
-.page-header {
-  margin-bottom: 1rem;
-}
 .page-header h1 {
-  font-size: 1.6rem;
-  margin-bottom: 0.25rem;
-}
-.page-subtitle {
-  font-size: 0.9rem;
-  color: #9ca3af;
+  margin: 0;
 }
 
-/* 필터 바 */
-.filter-bar {
-  background: rgba(15, 23, 42, 0.9);
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 1.5rem;
+.page-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--color-muted);
+  margin: 0 0 0.3rem;
+  font-size: 0.8rem;
 }
-.filter-row {
+
+.page-subtitle {
+  color: var(--color-muted);
+  margin: 0.3rem 0 0;
+  font-size: 0.9rem;
+}
+
+.filter-grid {
   display: grid;
-  grid-template-columns: 2fr 1.2fr 1.2fr 1.4fr;
-  gap: 0.75rem;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: var(--space-md);
 }
-.filter-row.bottom-row {
-  margin-top: 0.75rem;
-  grid-template-columns: auto 1fr;
-  align-items: center;
-}
+
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.3rem;
-}
-.field label {
-  font-size: 0.8rem;
+  gap: 0.35rem;
+  font-size: 0.85rem;
   color: #e5e7eb;
 }
+
 .field input,
 .field select {
   background: #020617;
-  border-radius: 8px;
+  border-radius: 12px;
   border: 1px solid #1f2937;
-  padding: 0.45rem 0.7rem;
-  font-size: 0.85rem;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.95rem;
   color: #e5e5e5;
 }
 
-/* 검색 input + 버튼 */
 .search-input-wrap {
   display: flex;
-  gap: 0.35rem;
+  gap: 0.5rem;
 }
+
 .search-input-wrap input {
   flex: 1;
 }
+
 .search-btn {
   border-radius: 999px;
   border: none;
-  background: #e50914;
+  background: var(--color-accent);
   color: #fff;
   font-size: 0.85rem;
-  padding: 0 1rem;
+  padding: 0 1.4rem;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
+
 .search-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 16px rgba(229, 9, 20, 0.5);
 }
 
-/* 필터 하단 */
+.filter-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-md);
+  gap: var(--space-sm);
+}
+
 .reset-btn {
   border-radius: 999px;
   border: 1px solid #4b5563;
   background: transparent;
   color: #e5e5e5;
-  font-size: 0.8rem;
-  padding: 0.3rem 0.9rem;
+  font-size: 0.85rem;
+  padding: 0.35rem 1rem;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
+
 .reset-btn:hover {
   background: #111827;
 }
+
 .result-info {
-  font-size: 0.8rem;
-  color: #9ca3af;
+  font-size: 0.85rem;
+  color: var(--color-muted);
   text-align: right;
+  flex: 1;
 }
 
-/* 결과 영역 */
 .results-section {
   min-height: 200px;
 }
+
 .movie-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 1rem 0.75rem;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 1rem;
 }
 
 .error-text {
   color: #f97373;
   font-size: 0.9rem;
 }
+
 .empty-text,
 .hint-text {
   font-size: 0.9rem;
-  color: #9ca3af;
+  color: var(--color-muted);
 }
 
-/* 반응형 */
 @media (max-width: 900px) {
-  .filter-row {
-    grid-template-columns: 1fr 1fr;
+  .filter-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (max-width: 640px) {
-  .filter-row {
+@media (max-width: 600px) {
+  .filter-grid {
     grid-template-columns: 1fr;
   }
-  .filter-row.bottom-row {
-    grid-template-columns: 1fr;
-    justify-items: flex-start;
+
+  .filter-footer {
+    flex-direction: column;
+    align-items: flex-start;
   }
+
   .result-info {
     text-align: left;
   }
