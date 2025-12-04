@@ -1,7 +1,7 @@
 <!-- src/views/HomeView.vue -->
 <template>
   <main class="home-page page-shell">
-    <section class="hero panel">
+    <section class="hero">
       <div class="hero__content">
         <p class="hero__eyebrow">Just for you</p>
         <h1 class="hero__title">
@@ -172,6 +172,8 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-lg);
+  padding: var(--space-lg) 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .hero__content {
@@ -227,6 +229,9 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: var(--space-sm);
+  padding: var(--space-md);
+  background: rgba(3, 7, 18, 0.35);
+  border-radius: var(--radius-md);
 }
 
 .stat {
