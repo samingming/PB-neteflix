@@ -1,5 +1,20 @@
-# Vue 3 + TypeScript + Vite
+# WSD Assignment 02 - WSDflix
 
-This template should help get you started developing with Vue 3 and TypeScript in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+## 📌 프로젝트 소개
+넷플릭스 스타일의 영화 추천 데모 사이트입니다.  
+Vue 3, TypeScript, TMDB API를 사용하여 SPA 형태로 구현했습니다.
 
-Learn more about the recommended Project Setup and IDE Support in the [Vue Docs TypeScript Guide](https://vuejs.org/guide/typescript/overview.html#project-setup).
+## 🛠 기술 스택
+- Vue 3 (Composition API, TypeScript)
+- Vite
+- Vue Router
+- Pinia
+- Axios
+- GitHub Pages (정적 배포)
+
+## 🚀 실행 방법
+
+```bash
+npm install
+npm run dev      # 개발 서버
+npm run build    # 프로덕션 빌드
