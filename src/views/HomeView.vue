@@ -51,7 +51,9 @@
           :key="movie.id"
           :movie="movie"
           :is-wishlisted="isInWishlist(movie.id)"
+          :is-recommended="isRecommended(movie.id)"
           @toggle-wishlist="toggleWishlist"
+          @toggle-recommend="toggleRecommendation"
         />
       </div>
     </section>
@@ -70,6 +72,7 @@ import {
   type TmdbMovie,
 } from '@/services/tmdb'
 import { useWishlist } from '@/composables/useWishlist'
+import { useRecommendations } from '@/composables/useRecommendations'
 
 interface HomeSectionState {
   key: string
@@ -80,6 +83,7 @@ interface HomeSectionState {
 }
 
 const { toggleWishlist, isInWishlist } = useWishlist()
+const { toggleRecommendation, isRecommended } = useRecommendations()
 
 const sections = reactive<HomeSectionState[]>([
   {

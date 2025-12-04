@@ -21,6 +21,7 @@ import {
   faClockRotateLeft,
   faHouse,
   faTrashCan,
+  faThumbsUp,
 } from '@fortawesome/free-solid-svg-icons'
 import { faVuejs } from '@fortawesome/free-brands-svg-icons'
 
@@ -44,6 +45,7 @@ library.add(
   faCircleHalfStroke,
   faFilterCircleXmark,
   faTrashCan,
+  faThumbsUp,
   faVuejs,
 )
 
