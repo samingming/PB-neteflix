@@ -162,6 +162,10 @@ onMounted(() => {
   line-height: 1.6;
 }
 
+[data-theme='light'] .detail-panel .detail-overview {
+  color: #111827;
+}
+
 .detail-actions {
   display: flex;
   gap: 0.75rem;

@@ -37,7 +37,8 @@
               <th>제목</th>
               <th>평점</th>
               <th>개봉</th>
-              <th>위시</th>
+              <th>추천</th>
+              <th>위시리스트</th>
             </tr>
           </thead>
           <tbody>
@@ -45,7 +46,7 @@
               v-for="(movie, idx) in tableState.movies"
               :key="movie.id"
               class="row-clickable"
-              @click="toggleWishlist(movie)"
+              @click="toggleRecommendation(movie)"
             >
               <td>{{ (tableState.page - 1) * 20 + idx + 1 }}</td>
               <td>
@@ -63,10 +64,22 @@
               <td>{{ movie.release_date ?? '-' }}</td>
               <td>
                 <span
-                  :class="['wish-indicator', isInWishlist(movie.id) ? 'wish-indicator--on' : '']"
+                  :class="[
+                    'recommend-indicator',
+                    isRecommended(movie.id) ? 'recommend-indicator--on' : '',
+                  ]"
                 >
-                  {{ isInWishlist(movie.id) ? 'Saved' : 'Save' }}
+                  {{ isRecommended(movie.id) ? '추천됨' : '추천하기' }}
                 </span>
+              </td>
+              <td>
+                <button
+                  type="button"
+                  class="wishlist-chip"
+                  @click.stop="toggleWishlist(movie)"
+                >
+                  {{ isInWishlist(movie.id) ? '해제' : '담기' }}
+                </button>
               </td>
             </tr>
           </tbody>
@@ -107,7 +120,9 @@
           :key="movie.id"
           :movie="movie"
           :is-wishlisted="isInWishlist(movie.id)"
+          :is-recommended="isRecommended(movie.id)"
           @toggle-wishlist="toggleWishlist"
+          @toggle-recommend="toggleRecommendation"
         />
       </div>
 
@@ -135,11 +150,13 @@ import LoaderSpinner from '@/components/common/LoaderSpinner.vue'
 import MovieCard from '@/components/movie/MovieCard.vue'
 import { fetchPopularMovies, type TmdbMovie } from '@/services/tmdb'
 import { useWishlist } from '@/composables/useWishlist'
+import { useRecommendations } from '@/composables/useRecommendations'
 
 type ViewMode = 'table' | 'infinite'
 
 const viewMode = ref<ViewMode>('table')
 const { toggleWishlist, isInWishlist } = useWishlist()
+const { toggleRecommendation, isRecommended } = useRecommendations()
 
 interface TableState {
   page: number
@@ -390,13 +407,33 @@ onBeforeUnmount(() => {
   text-overflow: ellipsis;
 }
 
-.wish-indicator {
+.recommend-indicator {
   font-size: 0.85rem;
   color: #9ca3af;
 }
 
-.wish-indicator--on {
+.recommend-indicator--on {
   color: #facc15;
+}
+
+.wishlist-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: #e5e5e5;
+  padding: 0.2rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.wishlist-chip:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme='light'] .wishlist-chip {
+  color: #0f172a;
+  border-color: rgba(15, 23, 42, 0.3);
 }
 
 .pagination {
