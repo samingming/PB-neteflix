@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
+import { getCurrentUserId } from '@/services/auth'
 import SigninView from '@/views/SigninView.vue'
 import HomeView from '@/views/HomeView.vue'
 import PopularView from '@/views/PopularView.vue'
@@ -54,7 +55,7 @@ const router = createRouter({
 
 // 로그인 여부 체크 (LocalStorage or Pinia)
 router.beforeEach((to, _from, next) => {
-  const isLoggedIn = localStorage.getItem('currentUser') !== null
+  const isLoggedIn = getCurrentUserId() !== null
 
   if (to.meta.requiresAuth && !isLoggedIn) {
     next({ name: 'signin' })

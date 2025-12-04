@@ -13,7 +13,14 @@
     <section class="panel filter-bar">
       <div class="filter-grid">
         <label class="field">
-          <span>검색어</span>
+          <span class="field-label">
+            <FontAwesomeIcon
+              :icon="['fas', 'magnifying-glass']"
+              class="field-label__icon"
+              aria-hidden="true"
+            />
+            검색어
+          </span>
           <div class="search-input-wrap">
             <input
               v-model="searchQuery"
@@ -22,13 +29,21 @@
               @keyup.enter="handleSearch"
             />
             <button type="button" class="search-btn" @click="handleSearch">
-              검색
+              <FontAwesomeIcon :icon="['fas', 'magnifying-glass']" aria-hidden="true" />
+              <span>검색</span>
             </button>
           </div>
         </label>
 
         <label class="field">
-          <span>장르</span>
+          <span class="field-label">
+            <FontAwesomeIcon
+              :icon="['fas', 'film']"
+              class="field-label__icon"
+              aria-hidden="true"
+            />
+            장르
+          </span>
           <select v-model.number="selectedGenreId">
             <option :value="0">전체</option>
             <option
@@ -42,7 +57,14 @@
         </label>
 
         <label class="field">
-          <span>최소 평점</span>
+          <span class="field-label">
+            <FontAwesomeIcon
+              :icon="['fas', 'star']"
+              class="field-label__icon"
+              aria-hidden="true"
+            />
+            최소 평점
+          </span>
           <select v-model.number="minRating">
             <option :value="0">전체</option>
             <option :value="5">5.0 이상</option>
@@ -52,7 +74,14 @@
         </label>
 
         <label class="field">
-          <span>정렬 방식</span>
+          <span class="field-label">
+            <FontAwesomeIcon
+              :icon="['fas', 'arrow-down-wide-short']"
+              class="field-label__icon"
+              aria-hidden="true"
+            />
+            정렬 방식
+          </span>
           <select v-model="sortOption">
             <option value="popularityDesc">인기 순</option>
             <option value="ratingDesc">평점 높은 순</option>
@@ -65,7 +94,8 @@
 
       <div class="filter-footer">
         <button type="button" class="reset-btn" @click="resetFilters">
-          필터 초기화
+          <FontAwesomeIcon :icon="['fas', 'filter-circle-xmark']" aria-hidden="true" />
+          <span>필터 초기화</span>
         </button>
         <span class="result-info" v-if="!loading && filteredMovies.length">
           총 {{ filteredMovies.length }}편 (검색 결과 {{ rawMovies.length }}편)
@@ -73,7 +103,10 @@
       </div>
 
       <div v-if="history.length" class="history-row">
-        <span class="history-label">최근 검색</span>
+        <span class="history-label">
+          <FontAwesomeIcon :icon="['fas', 'clock-rotate-left']" aria-hidden="true" />
+          <span>최근 검색</span>
+        </span>
         <div class="history-list">
           <button
             v-for="item in history"
@@ -86,7 +119,8 @@
           </button>
         </div>
         <button type="button" class="clear-history" @click="clearHistory">
-          전체 삭제
+          <FontAwesomeIcon :icon="['fas', 'trash-can']" aria-hidden="true" />
+          <span>전체 삭제</span>
         </button>
       </div>
     </section>
@@ -273,6 +307,18 @@ function selectHistory(term: string) {
   color: #e5e7eb;
 }
 
+.field-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+
+.field-label__icon {
+  color: var(--color-accent);
+  font-size: 0.9rem;
+}
+
 .field input,
 .field select {
   background: #020617;
@@ -317,6 +363,9 @@ function selectHistory(term: string) {
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
   will-change: transform, box-shadow;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .search-btn:hover {
@@ -346,6 +395,9 @@ function selectHistory(term: string) {
   cursor: pointer;
   transition: background-color 0.15s ease;
   will-change: background-color;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
 .reset-btn:hover {
@@ -370,6 +422,9 @@ function selectHistory(term: string) {
 .history-label {
   font-size: 0.85rem;
   color: var(--color-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .history-list {
@@ -398,6 +453,9 @@ function selectHistory(term: string) {
   font-size: 0.8rem;
   cursor: pointer;
   transition: color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
 }
 
 .results-section {
