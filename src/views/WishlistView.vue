@@ -32,10 +32,21 @@
             <div>
               <h3>{{ movie.title }}</h3>
               <p class="wishlist-card__meta">TMDB #{{ movie.id }}</p>
+              <p
+                v-if="isRecommended(movie.id)"
+                class="wishlist-card__meta wishlist-card__meta--highlight"
+              >
+                추천 등록됨
+              </p>
             </div>
-            <button type="button" class="remove-btn" @click="handleRemove(movie.id)">
-              제거
-            </button>
+            <div class="wishlist-card__actions">
+              <button type="button" class="remove-btn" @click="handleRemove(movie.id)">
+                삭제
+              </button>
+              <button type="button" class="recommend-btn" @click="handleRecommend(movie.id)">
+                {{ isRecommended(movie.id) ? '추천 취소' : '추천 등록' }}
+              </button>
+            </div>
           </div>
         </article>
       </div>
@@ -49,17 +60,19 @@
 
 <script setup lang="ts">
 import { useWishlist } from '@/composables/useWishlist'
+import { useRecommendations } from '@/composables/useRecommendations'
 import type { TmdbMovie } from '@/services/tmdb'
 
 const { wishlist, toggleWishlist } = useWishlist()
+const { toggleRecommendation, isRecommended } = useRecommendations()
 
 function getPosterUrl(path: string | null) {
   return path ? `https://image.tmdb.org/t/p/w300${path}` : ''
 }
 
-function handleRemove(movieId: number) {
+function buildPayload(movieId: number) {
   const movie = wishlist.value.find((item) => item.id === movieId)
-  if (!movie) return
+  if (!movie) return null
 
   const payload: TmdbMovie = {
     id: movie.id,
@@ -67,7 +80,19 @@ function handleRemove(movieId: number) {
     poster_path: movie.poster_path,
     overview: '',
   }
+  return payload
+}
+
+function handleRemove(movieId: number) {
+  const payload = buildPayload(movieId)
+  if (!payload) return
   toggleWishlist(payload)
+}
+
+function handleRecommend(movieId: number) {
+  const payload = buildPayload(movieId)
+  if (!payload) return
+  toggleRecommendation(payload)
 }
 </script>
 
@@ -152,6 +177,18 @@ function handleRemove(movieId: number) {
   color: var(--color-muted);
 }
 
+.wishlist-card__meta--highlight {
+  color: var(--color-accent);
+  font-weight: 600;
+  margin-top: 0.1rem;
+}
+
+.wishlist-card__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
 .remove-btn {
   border-radius: 999px;
   border: none;
@@ -167,6 +204,26 @@ function handleRemove(movieId: number) {
 .remove-btn:hover {
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(229, 9, 20, 0.4);
+}
+
+.recommend-btn {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: #fff;
+  font-size: 0.85rem;
+  padding: 0.35rem 1.1rem;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+[data-theme='light'] .recommend-btn {
+  color: #0f172a;
+  border-color: rgba(15, 23, 42, 0.3);
+}
+
+.recommend-btn:hover {
+  opacity: 0.75;
 }
 
 .info-text {
