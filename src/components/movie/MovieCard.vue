@@ -18,6 +18,7 @@
       <h3 class="title">{{ movie.title }}</h3>
       <p v-if="movie.vote_average" class="meta">⭐ {{ movie.vote_average.toFixed(1) }}</p>
       <p v-if="movie.release_date" class="meta">{{ movie.release_date }}</p>
+      <RouterLink class="detail-link" :to="`/movies/${movie.id}`">상세 보기</RouterLink>
     </div>
   </article>
 </template>
@@ -52,6 +53,8 @@ function onClick() {
   cursor: pointer;
   transition: transform 0.25s ease, box-shadow 0.25s ease;
   border-radius: 1rem;
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
 }
 
 .poster-wrap {
@@ -67,6 +70,7 @@ function onClick() {
   height: 100%;
   object-fit: cover;
   transition: transform 0.25s ease;
+  will-change: transform;
 }
 
 .poster-placeholder {
@@ -94,6 +98,9 @@ function onClick() {
   margin-top: 0.35rem;
   font-size: 0.85rem;
   color: #e5e5e5;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 
 .title {
@@ -121,6 +128,17 @@ function onClick() {
   align-items: center;
   justify-content: center;
   box-shadow: 0 6px 20px rgba(229, 9, 20, 0.35);
+}
+
+.detail-link {
+  align-self: flex-start;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 0.2rem 0.75rem;
+  font-size: 0.75rem;
+  color: #fff;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  will-change: background-color, color;
 }
 
 @media (max-width: 640px) {

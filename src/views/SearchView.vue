@@ -71,6 +71,24 @@
           총 {{ filteredMovies.length }}편 (검색 결과 {{ rawMovies.length }}편)
         </span>
       </div>
+
+      <div v-if="history.length" class="history-row">
+        <span class="history-label">최근 검색</span>
+        <div class="history-list">
+          <button
+            v-for="item in history"
+            :key="item"
+            class="history-chip"
+            type="button"
+            @click="selectHistory(item)"
+          >
+            {{ item }}
+          </button>
+        </div>
+        <button type="button" class="clear-history" @click="clearHistory">
+          전체 삭제
+        </button>
+      </div>
     </section>
 
     <section class="panel results-section">
@@ -118,6 +136,7 @@ import {
   type TmdbMovie,
 } from '@/services/tmdb'
 import { useWishlist } from '@/composables/useWishlist'
+import { useSearchHistory } from '@/composables/useSearchHistory'
 
 const searchQuery = ref('')
 const rawMovies = ref<TmdbMovie[]>([])
@@ -133,6 +152,7 @@ const sortOption = ref<'popularityDesc' | 'ratingDesc' | 'ratingAsc' | 'dateDesc
 )
 
 const { toggleWishlist, isInWishlist } = useWishlist()
+const { history, addSearch, clearHistory } = useSearchHistory()
 
 async function handleSearch() {
   if (!searchQuery.value.trim()) {
@@ -149,6 +169,7 @@ async function handleSearch() {
   try {
     const res = await searchMovies(searchQuery.value.trim(), 1)
     rawMovies.value = res.results
+    addSearch(searchQuery.value)
   } catch (err) {
     console.error(err)
     error.value = '검색에 실패했습니다. 잠시 후 다시 시도해 주세요.'
@@ -206,6 +227,11 @@ onMounted(async () => {
     console.error(err)
   }
 })
+
+function selectHistory(term: string) {
+  searchQuery.value = term
+  void handleSearch()
+}
 </script>
 
 <style scoped>
@@ -275,6 +301,7 @@ onMounted(async () => {
   padding: 0 1.4rem;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  will-change: transform, box-shadow;
 }
 
 .search-btn:hover {
@@ -299,6 +326,7 @@ onMounted(async () => {
   padding: 0.35rem 1rem;
   cursor: pointer;
   transition: background-color 0.15s ease;
+  will-change: background-color;
 }
 
 .reset-btn:hover {
@@ -310,6 +338,47 @@ onMounted(async () => {
   color: var(--color-muted);
   text-align: right;
   flex: 1;
+}
+
+.history-row {
+  margin-top: var(--space-md);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.history-label {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.history-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.history-chip {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  color: #e5e5e5;
+  padding: 0.2rem 0.9rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+  will-change: background-color, color;
+}
+
+.clear-history {
+  border: none;
+  background: transparent;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: color 0.2s ease;
 }
 
 .results-section {

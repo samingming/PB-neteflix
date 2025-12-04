@@ -52,6 +52,14 @@
         >
           Sign In
         </button>
+        <button
+          type="button"
+          class="head-bar__button head-bar__button--muted"
+          :aria-pressed="isMotionReduced"
+          @click="toggleMotion"
+        >
+          {{ motionLabel }}
+        </button>
       </div>
     </div>
   </header>
@@ -62,6 +70,7 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { getCurrentUserId, logout } from '@/services/auth'
+import { useMotionPreference } from '@/composables/useMotionPreference'
 
 const router = useRouter()
 const userId = ref<string | null>(getCurrentUserId())
@@ -75,6 +84,7 @@ const navItems = [
 ]
 
 const isAuthenticated = computed(() => userId.value !== null)
+const { isMotionReduced, toggleMotion, motionLabel } = useMotionPreference()
 
 watch(
   () => router.currentRoute.value.fullPath,
@@ -152,6 +162,8 @@ function handleLogout() {
   background: transparent;
   cursor: pointer;
   padding: 0;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .head-bar__menu span {
@@ -175,6 +187,7 @@ function handleLogout() {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   position: relative;
+  will-change: color;
 }
 
 .head-bar__link.router-link-active::after,
@@ -217,6 +230,7 @@ function handleLogout() {
   padding: 0.45rem 1.2rem;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  will-change: opacity, transform;
 }
 
 .head-bar__button:hover {
@@ -226,6 +240,14 @@ function handleLogout() {
 .head-bar__button--ghost {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.head-bar__button--muted {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #e5e5e5;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.9rem;
 }
 
 @media (max-width: 900px) {
