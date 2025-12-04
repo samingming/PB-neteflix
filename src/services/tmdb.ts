@@ -32,6 +32,7 @@ export interface TmdbMovie {
   poster_path: string | null
   vote_average?: number
   release_date?: string
+  genre_ids?: number[]
 }
 
 export interface TmdbResponse {
@@ -70,4 +71,16 @@ export async function searchMovies(query: string, page = 1): Promise<TmdbRespons
   )}`
   const { data } = await client.get<TmdbResponse>(url)
   return data
+}
+
+export interface TmdbGenre {
+  id: number
+  name: string
+}
+
+export async function fetchGenres(): Promise<TmdbGenre[]> {
+  const apiKey = getApiKeyOrThrow()
+  const url = `/genre/movie/list?api_key=${apiKey}&language=${LANGUAGE}`
+  const { data } = await client.get<{ genres: TmdbGenre[] }>(url)
+  return data.genres
 }
