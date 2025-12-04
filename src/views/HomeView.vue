@@ -1,13 +1,9 @@
 <!-- src/views/HomeView.vue -->
 <template>
   <main class="home-page page-shell">
-    <section class="hero">
+    <section class="hero panel">
       <div class="hero__content">
         <p class="hero__eyebrow">Just for you</p>
-        <h1 class="hero__title">
-          원하는 영화를 빠르게 발견하고
-          <span>나만의 리스트</span>를 만들어 보세요.
-        </h1>
         <p class="hero__copy">
           TMDB API와 연동된 실시간 인기, 상영 중, 장르 추천까지 한 곳에서 만나볼 수 있습니다.
         </p>
@@ -172,8 +168,10 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-lg);
-  padding: var(--space-lg) 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background-image: linear-gradient(120deg, rgba(3, 7, 18, 0.75), rgba(3, 7, 18, 0.35)),
+    url('https://image.tmdb.org/t/p/original/8sMmAmN2x7mBiNKEX2o0aOTozEB.jpg');
+  background-size: cover;
+  background-position: center;
 }
 
 .hero__content {
@@ -188,16 +186,6 @@ onMounted(async () => {
   font-size: 0.8rem;
   color: #fbbf24;
   margin: 0;
-}
-
-.hero__title {
-  font-size: clamp(2rem, 4vw, 3.4rem);
-  margin: 0;
-  line-height: 1.2;
-}
-
-.hero__title span {
-  color: var(--color-accent);
 }
 
 .hero__copy {
@@ -229,9 +217,6 @@ onMounted(async () => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: var(--space-sm);
-  padding: var(--space-md);
-  background: rgba(3, 7, 18, 0.35);
-  border-radius: var(--radius-md);
 }
 
 .stat {
