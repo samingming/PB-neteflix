@@ -1,4 +1,4 @@
-<!-- src/components/movie/MovieCard.vue -->
+﻿<!-- src/components/movie/MovieCard.vue -->
 <template>
   <article
     class="movie-card"
@@ -22,7 +22,8 @@
     </div>
     <div class="movie-info">
       <h3 class="title">{{ movie.title }}</h3>
-      <p v-if="movie.vote_average" class="meta">⭐ {{ movie.vote_average.toFixed(1) }}</p>
+      <p v-if="overviewText" class="overview">{{ overviewText }}</p>
+      <p v-if="movie.vote_average" class="meta">평점 {{ movie.vote_average.toFixed(1) }}</p>
       <p v-if="movie.release_date" class="meta">{{ movie.release_date }}</p>
       <RouterLink class="detail-link" :to="`/movies/${movie.id}`">상세 보기</RouterLink>
     </div>
@@ -50,6 +51,11 @@ const posterSrcSet = computed(() =>
     ? `https://image.tmdb.org/t/p/w342${props.movie.poster_path} 342w, https://image.tmdb.org/t/p/w500${props.movie.poster_path} 500w`
     : undefined,
 )
+const overviewText = computed(() => {
+  const text = props.movie.overview?.trim()
+  if (!text) return ''
+  return text.length > 90 ? `${text.slice(0, 90)}...` : text
+})
 
 const isTouchActive = ref(false)
 let touchTimer: number | null = null
@@ -148,6 +154,16 @@ function handleTouchEnd() {
 
 [data-theme='light'] .movie-card .title {
   color: #111827;
+}
+
+.overview {
+  font-size: 0.78rem;
+  color: #cbd5f5;
+  line-height: 1.3;
+}
+
+[data-theme='light'] .movie-card .overview {
+  color: #4b5563;
 }
 
 .meta {
