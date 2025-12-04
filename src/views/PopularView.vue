@@ -314,6 +314,7 @@ onBeforeUnmount(() => {
   padding: 0.4rem 0.9rem;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  will-change: background-color, color, transform;
 }
 
 .toggle-btn.active {
@@ -343,6 +344,11 @@ onBeforeUnmount(() => {
   font-weight: 600;
   color: #e5e5e5;
   background: rgba(15, 23, 42, 0.8);
+}
+
+[data-theme='light'] .movie-table th {
+  color: #0f172a;
+  background: rgba(226, 232, 240, 0.9);
 }
 
 .row-clickable {
@@ -410,6 +416,7 @@ onBeforeUnmount(() => {
   font-size: 0.85rem;
   cursor: pointer;
   transition: background-color 0.2s ease;
+  will-change: background-color;
 }
 
 .page-btn:disabled {
@@ -443,6 +450,7 @@ onBeforeUnmount(() => {
   cursor: pointer;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.7);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  will-change: transform, box-shadow;
 }
 
 .top-btn:hover {

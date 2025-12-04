@@ -1,6 +1,6 @@
 // src/services/tmdb.ts
 import axios, { type AxiosInstance } from 'axios'
-import { getTmdbKey } from './auth'
+import { getStoredTmdbKey } from './auth'
 
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3'
 const LANGUAGE = 'ko-KR'
@@ -13,6 +13,15 @@ export interface TmdbMovie {
   vote_average?: number
   release_date?: string
   genre_ids?: number[]
+}
+
+export interface TmdbMovieDetail extends TmdbMovie {
+  backdrop_path?: string | null
+  runtime?: number
+  genres?: TmdbGenre[]
+  homepage?: string | null
+  tagline?: string | null
+  status?: string
 }
 
 export interface TmdbResponse {
@@ -29,6 +38,7 @@ export interface TmdbGenre {
 class TmdbService {
   private readonly client: AxiosInstance
   private readonly language: string
+  private readonly envKey = import.meta.env.VITE_TMDB_API_KEY as string | undefined
 
   constructor(language = LANGUAGE) {
     this.language = language
@@ -38,7 +48,7 @@ class TmdbService {
   }
 
   private getApiKeyOrThrow(): string {
-    const key = getTmdbKey()
+    const key = this.envKey || getStoredTmdbKey()
     if (!key) {
       throw new Error('TMDB API Key가 없습니다. 로그인 화면에서 다시 입력해 주세요.')
     }
@@ -84,6 +94,13 @@ class TmdbService {
     const { data } = await this.client.get<{ genres: TmdbGenre[] }>(url)
     return data.genres
   }
+
+  async fetchMovieDetail(movieId: number): Promise<TmdbMovieDetail> {
+    const apiKey = this.getApiKeyOrThrow()
+    const url = `/movie/${movieId}?api_key=${apiKey}&language=${this.language}`
+    const { data } = await this.client.get<TmdbMovieDetail>(url)
+    return data
+  }
 }
 
 const tmdbService = new TmdbService()
@@ -94,3 +111,4 @@ export const fetchDiscoverMovies = (extraParams = '', page = 1) =>
   tmdbService.fetchDiscoverMovies(extraParams, page)
 export const searchMovies = (query: string, page = 1) => tmdbService.searchMovies(query, page)
 export const fetchGenres = () => tmdbService.fetchGenres()
+export const fetchMovieDetail = (movieId: number) => tmdbService.fetchMovieDetail(movieId)

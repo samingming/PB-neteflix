@@ -161,6 +161,7 @@ function handleRemove(movieId: number) {
   padding: 0.35rem 1.1rem;
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  will-change: transform, box-shadow;
 }
 
 .remove-btn:hover {

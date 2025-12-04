@@ -52,6 +52,43 @@
         >
           Sign In
         </button>
+        <div class="head-bar__toggles">
+          <button
+            type="button"
+            class="head-bar__button head-bar__button--muted"
+            :aria-pressed="theme === 'light'"
+            @click="toggleTheme"
+          >
+            {{ themeLabel }}
+          </button>
+          <div class="font-controls" role="group" aria-label="글자 크기 조절">
+            <button
+              type="button"
+              class="head-bar__button head-bar__button--muted"
+              aria-label="글자 크기 축소"
+              @click="decrease"
+            >
+              A-
+            </button>
+            <span class="font-label">{{ fontScaleLabel }}</span>
+            <button
+              type="button"
+              class="head-bar__button head-bar__button--muted"
+              aria-label="글자 크기 확대"
+              @click="increase"
+            >
+              A+
+            </button>
+          </div>
+          <button
+            type="button"
+            class="head-bar__button head-bar__button--muted"
+            :aria-pressed="isMotionReduced"
+            @click="toggleMotion"
+          >
+            {{ motionLabel }}
+          </button>
+        </div>
       </div>
     </div>
   </header>
@@ -62,6 +99,9 @@ import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 
 import { getCurrentUserId, logout } from '@/services/auth'
+import { useMotionPreference } from '@/composables/useMotionPreference'
+import { useTheme } from '@/composables/useTheme'
+import { useFontScale } from '@/composables/useFontScale'
 
 const router = useRouter()
 const userId = ref<string | null>(getCurrentUserId())
@@ -75,6 +115,9 @@ const navItems = [
 ]
 
 const isAuthenticated = computed(() => userId.value !== null)
+const { isMotionReduced, toggleMotion, motionLabel } = useMotionPreference()
+const { theme, toggleTheme, themeLabel } = useTheme()
+const { increase, decrease, fontScaleLabel } = useFontScale()
 
 watch(
   () => router.currentRoute.value.fullPath,
@@ -152,6 +195,8 @@ function handleLogout() {
   background: transparent;
   cursor: pointer;
   padding: 0;
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .head-bar__menu span {
@@ -175,6 +220,7 @@ function handleLogout() {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   position: relative;
+  will-change: color;
 }
 
 .head-bar__link.router-link-active::after,
@@ -197,6 +243,7 @@ function handleLogout() {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  flex-wrap: wrap;
 }
 
 .head-bar__user {
@@ -208,6 +255,10 @@ function handleLogout() {
   text-overflow: ellipsis;
 }
 
+[data-theme='light'] .head-bar__user {
+  color: #0f172a;
+}
+
 .head-bar__button {
   background: var(--color-accent);
   border: none;
@@ -217,6 +268,7 @@ function handleLogout() {
   padding: 0.45rem 1.2rem;
   cursor: pointer;
   transition: opacity 0.2s ease;
+  will-change: opacity, transform;
 }
 
 .head-bar__button:hover {
@@ -226,6 +278,32 @@ function handleLogout() {
 .head-bar__button--ghost {
   background: transparent;
   border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.head-bar__button--muted {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #e5e5e5;
+  font-size: 0.8rem;
+  padding: 0.35rem 0.9rem;
+}
+
+.head-bar__toggles {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.font-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.font-label {
+  font-size: 0.8rem;
+  color: var(--color-muted);
 }
 
 @media (max-width: 900px) {
