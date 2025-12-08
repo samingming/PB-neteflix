@@ -1,28 +1,18 @@
-import { fileURLToPath, URL } from 'node:url'
+// wsd-movie/vite.config.ts
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
 
-// GitHub Pages 배포: 레포 이름과 동일하게!
 export default defineConfig({
-  base: '/PB-neteflix/',
-
   plugins: [vue()],
-
+  base: '/PB-neteflix/',
+  build: {
+    outDir: '../docs',
+    emptyOutDir: true,
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
-  },
-
-  // 선택 사항 (로컬 개발 편의용)
-  server: {
-    port: 5173,
-    open: true,
-  },
-
-  // 선택 사항 (기본값과 거의 같지만 명시)
-  build: {
-    outDir: '../docs',
-    sourcemap: false,
   },
 })
