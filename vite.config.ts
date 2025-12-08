@@ -22,7 +22,7 @@ export default defineConfig({
 
   // 선택 사항 (기본값과 거의 같지만 명시)
   build: {
-    outDir: 'dist',
+    outDir: '../docs',
     sourcemap: false,
   },
 })
