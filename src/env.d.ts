@@ -5,3 +5,11 @@ declare module '*.vue' {
   const component: DefineComponent<Record<string, unknown>, Record<string, unknown>, any>
   export default component
 }
+
+export {}
+
+declare module '@vue/runtime-core' {
+  export interface GlobalComponents {
+    FontAwesomeIcon: typeof import('@fortawesome/vue-fontawesome')['FontAwesomeIcon']
+  }
+}

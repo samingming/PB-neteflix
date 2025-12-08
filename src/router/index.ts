@@ -1,10 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import type { RouteRecordRaw } from 'vue-router'
+import { getCurrentUserId } from '@/services/auth'
 import SigninView from '@/views/SigninView.vue'
 import HomeView from '@/views/HomeView.vue'
 import PopularView from '@/views/PopularView.vue'
 import SearchView from '@/views/SearchView.vue'
 import WishlistView from '@/views/WishlistView.vue'
+import RecommendedView from '@/views/RecommendedView.vue'
+import MovieDetailView from '@/views/MovieDetailView.vue'
 
 const routes: RouteRecordRaw[] = [
   {
@@ -37,6 +40,18 @@ const routes: RouteRecordRaw[] = [
     component: WishlistView,
     meta: { requiresAuth: true },
   },
+  {
+    path: '/recommended',
+    name: 'recommended',
+    component: RecommendedView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/movies/:id',
+    name: 'movie-detail',
+    component: MovieDetailView,
+    meta: { requiresAuth: true },
+  },
   { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 
@@ -47,7 +62,7 @@ const router = createRouter({
 
 // 로그인 여부 체크 (LocalStorage or Pinia)
 router.beforeEach((to, _from, next) => {
-  const isLoggedIn = localStorage.getItem('currentUser') !== null
+  const isLoggedIn = getCurrentUserId() !== null
 
   if (to.meta.requiresAuth && !isLoggedIn) {
     next({ name: 'signin' })

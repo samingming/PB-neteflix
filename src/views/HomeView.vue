@@ -51,7 +51,9 @@
           :key="movie.id"
           :movie="movie"
           :is-wishlisted="isInWishlist(movie.id)"
+          :is-recommended="isRecommended(movie.id)"
           @toggle-wishlist="toggleWishlist"
+          @toggle-recommend="toggleRecommendation"
         />
       </div>
     </section>
@@ -70,6 +72,7 @@ import {
   type TmdbMovie,
 } from '@/services/tmdb'
 import { useWishlist } from '@/composables/useWishlist'
+import { useRecommendations } from '@/composables/useRecommendations'
 
 interface HomeSectionState {
   key: string
@@ -80,6 +83,7 @@ interface HomeSectionState {
 }
 
 const { toggleWishlist, isInWishlist } = useWishlist()
+const { toggleRecommendation, isRecommended } = useRecommendations()
 
 const sections = reactive<HomeSectionState[]>([
   {
@@ -169,7 +173,7 @@ onMounted(async () => {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-lg);
   background-image: linear-gradient(120deg, rgba(3, 7, 18, 0.75), rgba(3, 7, 18, 0.35)),
-    url('https://image.tmdb.org/t/p/original/8sMmAmN2x7mBiNKEX2o0aOTozEB.jpg');
+    var(--hero-background, url('https://image.tmdb.org/t/p/original/8sMmAmN2x7mBiNKEX2o0aOTozEB.jpg'));
   background-size: cover;
   background-position: center;
 }
@@ -178,6 +182,7 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
+  color: #fff;
 }
 
 .hero__eyebrow {
@@ -190,7 +195,7 @@ onMounted(async () => {
 
 .hero__copy {
   max-width: 520px;
-  color: var(--color-muted);
+  color: #f8fafc;
   margin: 0 0 var(--space-md);
 }
 
@@ -222,11 +227,12 @@ onMounted(async () => {
 .stat {
   background: rgba(3, 7, 18, 0.65);
   border-radius: var(--radius-md);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   padding: var(--space-md);
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
+  color: #fff;
 }
 
 .stat strong {
@@ -234,7 +240,7 @@ onMounted(async () => {
 }
 
 .stat span {
-  color: var(--color-muted);
+  color: rgba(255, 255, 255, 0.8);
   font-size: 0.85rem;
 }
 

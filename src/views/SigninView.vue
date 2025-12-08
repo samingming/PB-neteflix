@@ -73,15 +73,20 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { tryLogin, tryRegister } from '@/services/auth'
+import {
+  getRememberedEmail,
+  isKeepLoginEnabled,
+  tryLogin,
+  tryRegister,
+} from '@/services/auth'
 
 const router = useRouter()
 
 const mode = ref<'login' | 'register'>('login')
 
-const loginEmail = ref('')
+const loginEmail = ref(getRememberedEmail() ?? '')
 const loginPassword = ref('')
-const rememberMe = ref(true)
+const rememberMe = ref(isKeepLoginEnabled())
 
 const registerEmail = ref('')
 const registerPassword = ref('')
@@ -133,6 +138,7 @@ function handleRegister() {
     () => {
       message.value = '회원가입 성공! 로그인 탭으로 이동합니다.'
       mode.value = 'login'
+      loginEmail.value = registerEmail.value
     },
     (err: string) => {
       message.value = err
