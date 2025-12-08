@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [vue()],
   base: '/PB-neteflix/',
   build: {
-    outDir: '../docs',
+    outDir: 'docs',
     emptyOutDir: true,
   },
   resolve: {
