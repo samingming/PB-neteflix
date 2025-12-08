@@ -24,40 +24,83 @@
       </div>
     </header>
 
-    <section v-if="viewMode === 'table'" class="panel">
+    <section v-if="viewMode === 'table'" class="panel infinite-view">
       <LoaderSpinner v-if="tableState.loading" />
       <p v-else-if="tableState.error" class="error-text">{{ tableState.error }}</p>
 
-      <div v-else class="table-wrapper">
+      <template v-else>
+        <div class="movie-grid">
+          <MovieCard
+            v-for="movie in tableState.movies"
+            :key="movie.id"
+            :movie="movie"
+            :is-wishlisted="isInWishlist(movie.id)"
+            :is-recommended="isRecommended(movie.id)"
+            @toggle-wishlist="toggleWishlist"
+            @toggle-recommend="toggleRecommendation"
+          />
+        </div>
+
+        <div class="pagination">
+          <button
+            type="button"
+            class="page-btn"
+            :disabled="tableState.page <= 1"
+            @click="changeTablePage(tableState.page - 1)"
+          >
+            ??
+          </button>
+          <span class="page-info">
+            {{ tableState.page }} / {{ tableState.totalPages }}
+          </span>
+          <button
+            type="button"
+            class="page-btn"
+            :disabled="tableState.page >= tableState.totalPages"
+            @click="changeTablePage(tableState.page + 1)"
+          >
+            ??
+          </button>
+        </div>
+      </template>
+    </section>
+
+    <section v-else class="panel">
+      <p class="info-bar">스크롤을 내리면 자동으로 다음 인기 영화가 이어집니다.</p>
+      <div class="table-wrapper">
         <table class="movie-table">
           <thead>
             <tr>
-              <th>#</th>
+              <th>순위</th>
               <th>포스터</th>
               <th>제목</th>
-              <th>평점</th>
-              <th>개봉</th>
+              <th>⭐평점</th>
+              <th>개봉일</th>
               <th>추천</th>
               <th>위시리스트</th>
             </tr>
           </thead>
           <tbody>
             <tr
-              v-for="(movie, idx) in tableState.movies"
+              v-for="(movie, idx) in infiniteState.movies"
               :key="movie.id"
               class="row-clickable"
               @click="toggleRecommendation(movie)"
             >
-              <td>{{ (tableState.page - 1) * 20 + idx + 1 }}</td>
+              <td>{{ idx + 1 }}</td>
               <td>
-                <div class="thumb">
+                <RouterLink
+                  class="thumb"
+                  :to="`/movies/${movie.id}`"
+                  @click.stop
+                >
                   <img
                     v-if="movie.poster_path"
                     :src="getPosterUrl(movie.poster_path)"
                     :alt="movie.title"
                   />
                   <div v-else class="thumb-placeholder">No Image</div>
-                </div>
+                </RouterLink>
               </td>
               <td class="title-cell">{{ movie.title }}</td>
               <td>{{ movie.vote_average?.toFixed(1) ?? '-' }}</td>
@@ -69,7 +112,7 @@
                     isRecommended(movie.id) ? 'recommend-indicator--on' : '',
                   ]"
                 >
-                  {{ isRecommended(movie.id) ? '추천됨' : '추천하기' }}
+                  {{ isRecommended(movie.id) ? '추천됨' : '추천대기' }}
                 </span>
               </td>
               <td>
@@ -84,46 +127,6 @@
             </tr>
           </tbody>
         </table>
-
-        <div class="pagination">
-          <button
-            type="button"
-            class="page-btn"
-            :disabled="tableState.page <= 1"
-            @click="changeTablePage(tableState.page - 1)"
-          >
-            이전
-          </button>
-          <span class="page-info">
-            {{ tableState.page }} / {{ tableState.totalPages }}
-          </span>
-          <button
-            type="button"
-            class="page-btn"
-            :disabled="tableState.page >= tableState.totalPages"
-            @click="changeTablePage(tableState.page + 1)"
-          >
-            다음
-          </button>
-        </div>
-      </div>
-    </section>
-
-    <section v-else class="panel infinite-view">
-      <div class="info-bar">
-        <p>스크롤을 내리면 자동으로 다음 인기 영화가 이어집니다.</p>
-      </div>
-
-      <div class="movie-grid">
-        <MovieCard
-          v-for="movie in infiniteState.movies"
-          :key="movie.id"
-          :movie="movie"
-          :is-wishlisted="isInWishlist(movie.id)"
-          :is-recommended="isRecommended(movie.id)"
-          @toggle-wishlist="toggleWishlist"
-          @toggle-recommend="toggleRecommendation"
-        />
       </div>
 
       <LoaderSpinner v-if="infiniteState.loading" />
@@ -141,6 +144,7 @@
         Top
       </button>
     </section>
+
   </main>
 </template>
 
@@ -377,6 +381,7 @@ onBeforeUnmount(() => {
 }
 
 .thumb {
+  display: block;
   width: 54px;
   height: 80px;
   border-radius: 6px;
