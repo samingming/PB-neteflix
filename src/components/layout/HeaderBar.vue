@@ -48,71 +48,81 @@
           <span class="head-bar__user-text">{{ userId }}</span>
         </span>
         <button
-          v-if="isAuthenticated"
-          type="button"
-          class="head-bar__button head-bar__button--ghost"
-          @click="handleLogout"
-        >
-          <FontAwesomeIcon
-            :icon="['fas', 'right-from-bracket']"
-            class="head-bar__button-icon"
-            aria-hidden="true"
-          />
-          <span>Logout</span>
-        </button>
-        <button
-          v-else
+          v-if="!isAuthenticated"
           type="button"
           class="head-bar__button"
           @click="handleSignIn"
         >
           Sign In
         </button>
-        <div class="head-bar__toggles">
+        <div ref="settingsMenuRef" class="head-bar__display">
           <button
             type="button"
-            class="head-bar__button head-bar__button--muted"
-            :aria-pressed="theme === 'light'"
-            @click="toggleTheme"
+            class="head-bar__button head-bar__button--muted head-bar__display-trigger"
+            aria-haspopup="true"
+            :aria-expanded="isSettingsOpen"
+            @click="toggleSettings"
           >
-            <FontAwesomeIcon :icon="themeIcon" class="head-bar__button-icon" aria-hidden="true" />
-            <span>{{ themeLabel }}</span>
+            <FontAwesomeIcon :icon="['fas', 'arrow-down-wide-short']" class="head-bar__button-icon" aria-hidden="true" />
+            <span>Display</span>
           </button>
-          <div class="font-controls" role="group" aria-label="글자 크기 조절">
-            <FontAwesomeIcon
-              :icon="['fas', 'font']"
-              class="font-controls__icon"
-              aria-hidden="true"
-            />
+          <div v-if="isSettingsOpen" class="head-bar__display-menu" role="menu">
             <button
               type="button"
-              class="head-bar__button head-bar__button--muted"
-              aria-label="글자 크기 축소"
-              @click="decrease"
+              class="head-bar__button head-bar__button--muted head-bar__display-item"
+              :aria-pressed="theme === 'light'"
+              @click="toggleTheme"
             >
-              <FontAwesomeIcon :icon="['fas', 'minus']" aria-hidden="true" />
-              <span class="sr-only">-</span>
+              <FontAwesomeIcon :icon="themeIcon" class="head-bar__button-icon" aria-hidden="true" />
+              <span>{{ themeLabel }}</span>
             </button>
-            <span class="font-label">{{ fontScaleLabel }}</span>
+            <div class="display-menu__section" role="group" aria-label="?? ??">
+              <span class="display-menu__label">글자 크기</span>
+              <div class="font-controls">
+                <button
+                  type="button"
+                  class="head-bar__button head-bar__button--muted"
+                  aria-label="글자 크기 축소"
+                  @click="decrease"
+                >
+                  <FontAwesomeIcon :icon="['fas', 'minus']" aria-hidden="true" />
+                  <span class="sr-only">-</span>
+                </button>
+                <span class="font-label">{{ fontScaleLabel }}</span>
+                <button
+                  type="button"
+                  class="head-bar__button head-bar__button--muted"
+                  aria-label="글자 크기 확대"
+                  @click="increase"
+                >
+                  <FontAwesomeIcon :icon="['fas', 'plus']" aria-hidden="true" />
+                  <span class="sr-only">+</span>
+                </button>
+              </div>
+            </div>
             <button
               type="button"
-              class="head-bar__button head-bar__button--muted"
-              aria-label="글자 크기 확대"
-              @click="increase"
+              class="head-bar__button head-bar__button--muted head-bar__display-item"
+              :aria-pressed="isMotionReduced"
+              @click="toggleMotion"
             >
-              <FontAwesomeIcon :icon="['fas', 'plus']" aria-hidden="true" />
-              <span class="sr-only">+</span>
+              <FontAwesomeIcon :icon="motionIcon" class="head-bar__button-icon" aria-hidden="true" />
+              <span>{{ motionLabel }}</span>
+            </button>
+            <button
+              v-if="isAuthenticated"
+              type="button"
+              class="head-bar__button head-bar__button--ghost head-bar__display-item logout-btn"
+              @click="handleLogout"
+            >
+              <FontAwesomeIcon
+                :icon="['fas', 'right-from-bracket']"
+                class="head-bar__button-icon"
+                aria-hidden="true"
+              />
+              <span>Logout</span>
             </button>
           </div>
-          <button
-            type="button"
-            class="head-bar__button head-bar__button--muted"
-            :aria-pressed="isMotionReduced"
-            @click="toggleMotion"
-          >
-            <FontAwesomeIcon :icon="motionIcon" class="head-bar__button-icon" aria-hidden="true" />
-            <span>{{ motionLabel }}</span>
-          </button>
         </div>
       </div>
     </div>
@@ -132,6 +142,8 @@ const router = useRouter()
 const userId = ref<string | null>(getCurrentUserId())
 const isMenuOpen = ref(false)
 const isScrolled = ref(false)
+const isSettingsOpen = ref(false)
+const settingsMenuRef = ref<HTMLElement | null>(null)
 
 const navItems = [
   { to: '/', label: 'Home', icon: ['fas', 'house'] as const },
@@ -159,22 +171,37 @@ watch(
   () => {
     userId.value = getCurrentUserId()
     isMenuOpen.value = false
+    isSettingsOpen.value = false
   },
   { immediate: true },
 )
+
+watch(isMenuOpen, (open) => {
+  if (!open) {
+    isSettingsOpen.value = false
+  }
+})
 
 function updateScrollState() {
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
   isScrolled.value = scrollTop > 30
 }
 
+function handleClickOutside(event: MouseEvent) {
+  if (settingsMenuRef.value && !settingsMenuRef.value.contains(event.target as Node)) {
+    isSettingsOpen.value = false
+  }
+}
+
 onMounted(() => {
   updateScrollState()
   window.addEventListener('scroll', updateScrollState, { passive: true })
+  document.addEventListener('click', handleClickOutside)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateScrollState)
+  document.removeEventListener('click', handleClickOutside)
 })
 
 function goHome() {
@@ -185,6 +212,10 @@ function toggleMenu() {
   isMenuOpen.value = !isMenuOpen.value
 }
 
+function toggleSettings() {
+  isSettingsOpen.value = !isSettingsOpen.value
+}
+
 function handleSignIn() {
   router.push('/signin')
 }
@@ -192,8 +223,10 @@ function handleSignIn() {
 function handleLogout() {
   logout()
   userId.value = null
+  isSettingsOpen.value = false
   router.push('/signin')
 }
+
 </script>
 
 <style scoped>
@@ -380,22 +413,50 @@ function handleLogout() {
   border-radius: 0.6rem;
 }
 
-.head-bar__toggles {
+.head-bar__display {
+  position: relative;
+}
+
+.head-bar__display-trigger {
+  min-width: 6.5rem;
+  justify-content: center;
+}
+
+.head-bar__display-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 0.85rem;
+  border-radius: 0.75rem;
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  width: max(230px, 100%);
+  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.55);
+  z-index: 40;
+}
+
+.head-bar__display-item {
+  justify-content: flex-start;
+}
+
+.display-menu__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.display-menu__label {
+  font-size: 0.75rem;
+  color: var(--color-muted);
 }
 
 .font-controls {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-}
-
-.font-controls__icon {
-  color: var(--color-muted);
-  font-size: 0.8rem;
 }
 
 .head-bar__button-icon {
@@ -422,6 +483,12 @@ function handleLogout() {
 [data-theme='light'] .head-bar__button--muted {
   border-color: rgba(15, 23, 42, 0.25);
   color: #0f172a;
+}
+
+[data-theme='light'] .head-bar__display-menu {
+  background: rgba(248, 250, 252, 0.98);
+  border-color: rgba(15, 23, 42, 0.12);
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.12);
 }
 
 [data-theme='light'] .font-label {
@@ -479,6 +546,17 @@ function handleLogout() {
 
   .head-bar__user {
     max-width: none;
+  }
+
+  .head-bar__display {
+    width: 100%;
+  }
+
+  .head-bar__display-menu {
+    position: static;
+    width: 100%;
+    margin-top: 0.35rem;
+    box-shadow: none;
   }
 }
 </style>
