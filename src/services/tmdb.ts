@@ -1,9 +1,13 @@
 // src/services/tmdb.ts
-import axios, { type AxiosInstance } from 'axios'
+import axios, { isAxiosError, type AxiosInstance } from 'axios'
 import { getStoredTmdbKey } from './auth'
+import { TMDB_BASE_URL, TMDB_ENDPOINTS } from './URL'
+import { getCachedData, setCachedData } from './cache'
 
-const TMDB_BASE_URL = 'https://api.themoviedb.org/3'
 const LANGUAGE = 'ko-KR'
+const DEFAULT_CACHE_TTL_MS = 1000 * 60 * 5 // 5분
+const DETAIL_CACHE_TTL_MS = 1000 * 60 * 30 // 30분
+const GENRE_CACHE_TTL_MS = 1000 * 60 * 60 * 24 // 24시간
 
 export interface TmdbMovie {
   id: number
@@ -47,6 +51,10 @@ class TmdbService {
     })
   }
 
+  private isV4Token(key: string) {
+    return key.startsWith('eyJ')
+  }
+
   private getApiKeyOrThrow(): string {
     const key = this.envKey || getStoredTmdbKey()
     if (!key) {
@@ -55,51 +63,117 @@ class TmdbService {
     return key
   }
 
-  private withCommonParams(path: string, page = 1): string {
+  private buildHeaders(key: string) {
+    if (this.isV4Token(key)) {
+      return { Authorization: `Bearer ${key}` }
+    }
+    return {}
+  }
+
+  private async request<T>({
+    endpoint,
+    params = {},
+    cacheKey,
+    cacheTtl = DEFAULT_CACHE_TTL_MS,
+  }: {
+    endpoint: string
+    params?: Record<string, string | number>
+    cacheKey?: string
+    cacheTtl?: number
+  }): Promise<T> {
+    if (cacheKey) {
+      const cached = getCachedData<T>(cacheKey)
+      if (cached) return cached
+    }
+
     const apiKey = this.getApiKeyOrThrow()
-    return `${path}?api_key=${apiKey}&language=${this.language}&page=${page}`
+    const finalParams: Record<string, string | number> = {
+      language: this.language,
+      ...params,
+    }
+
+    if (!this.isV4Token(apiKey)) {
+      finalParams.api_key = apiKey
+    }
+
+    try {
+      const { data } = await this.client.get<T>(endpoint, {
+        params: finalParams,
+        headers: this.buildHeaders(apiKey),
+      })
+
+      if (cacheKey) {
+        setCachedData(cacheKey, data, cacheTtl)
+      }
+
+      return data
+    } catch (error) {
+      if (isAxiosError(error)) {
+        const statusMessage =
+          typeof error.response?.data === 'object'
+            ? (error.response?.data as { status_message?: string })?.status_message
+            : null
+        throw new Error(statusMessage ?? 'TMDB 요청이 실패했습니다. 잠시 후 다시 시도해 주세요.')
+      }
+      throw error
+    }
   }
 
   async fetchPopularMovies(page = 1): Promise<TmdbResponse> {
-    const url = this.withCommonParams('/movie/popular', page)
-    const { data } = await this.client.get<TmdbResponse>(url)
-    return data
+    return this.request<TmdbResponse>({
+      endpoint: TMDB_ENDPOINTS.popular,
+      params: { page },
+      cacheKey: `popular:${page}`,
+    })
   }
 
   async fetchNowPlayingMovies(page = 1): Promise<TmdbResponse> {
-    const url = this.withCommonParams('/movie/now_playing', page)
-    const { data } = await this.client.get<TmdbResponse>(url)
-    return data
+    return this.request<TmdbResponse>({
+      endpoint: TMDB_ENDPOINTS.nowPlaying,
+      params: { page },
+      cacheKey: `now:${page}`,
+    })
   }
 
   async fetchDiscoverMovies(extraParams = '', page = 1): Promise<TmdbResponse> {
-    const apiKey = this.getApiKeyOrThrow()
-    const url = `/discover/movie?api_key=${apiKey}&language=${this.language}&page=${page}${extraParams}`
-    const { data } = await this.client.get<TmdbResponse>(url)
-    return data
+    const params: Record<string, string | number> = { page }
+    if (extraParams) {
+      const search = new URLSearchParams(extraParams.startsWith('&') ? extraParams.slice(1) : extraParams)
+      search.forEach((value, key) => {
+        params[key] = value
+      })
+    }
+
+    return this.request<TmdbResponse>({
+      endpoint: TMDB_ENDPOINTS.discover,
+      params,
+      cacheKey: `discover:${page}:${extraParams}`,
+    })
   }
 
   async searchMovies(query: string, page = 1): Promise<TmdbResponse> {
-    const apiKey = this.getApiKeyOrThrow()
-    const url = `/search/movie?api_key=${apiKey}&language=${this.language}&page=${page}&query=${encodeURIComponent(
-      query,
-    )}`
-    const { data } = await this.client.get<TmdbResponse>(url)
-    return data
+    return this.request<TmdbResponse>({
+      endpoint: TMDB_ENDPOINTS.search,
+      params: { query, page },
+      cacheKey: `search:${query}:${page}`,
+    })
   }
 
   async fetchGenres(): Promise<TmdbGenre[]> {
-    const apiKey = this.getApiKeyOrThrow()
-    const url = `/genre/movie/list?api_key=${apiKey}&language=${this.language}`
-    const { data } = await this.client.get<{ genres: TmdbGenre[] }>(url)
+    const data = await this.request<{ genres: TmdbGenre[] }>({
+      endpoint: TMDB_ENDPOINTS.genres,
+      cacheKey: 'genres',
+      cacheTtl: GENRE_CACHE_TTL_MS,
+    })
     return data.genres
   }
 
   async fetchMovieDetail(movieId: number): Promise<TmdbMovieDetail> {
-    const apiKey = this.getApiKeyOrThrow()
-    const url = `/movie/${movieId}?api_key=${apiKey}&language=${this.language}`
-    const { data } = await this.client.get<TmdbMovieDetail>(url)
-    return data
+    return this.request<TmdbMovieDetail>({
+      endpoint: TMDB_ENDPOINTS.detail(movieId),
+      cacheKey: `detail:${movieId}`,
+      cacheTtl: DETAIL_CACHE_TTL_MS,
+    })
   }
 }
 

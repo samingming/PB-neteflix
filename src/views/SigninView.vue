@@ -2,25 +2,17 @@
   <div class="auth-page">
     <!-- 움직이는 별 배경 -->
     <div class="starfield">
-  <span
-    v-for="n in 100"
-    :key="n"
-    class="star"
-    :class="[
-      n % 3 === 0 ? 'star--near' : n % 2 === 0 ? 'star--mid' : 'star--far'
-    ]"
-    :style="{
-      top: Math.random() * 100 + 'vh',
-      left: Math.random() * 100 + 'vw',
-      animationDelay: Math.random() * 5 + 's'
-    }"
-  ></span>
-</div>
+      <span
+        v-for="star in stars"
+        :key="star.id"
+        class="star"
+        :class="`star--${star.variant}`"
+        :style="star.style"
+      ></span>
+    </div>
 
-
-    <div class="auth-card">
-      <!-- 상단 탭/타이틀 영역 -->
-      <div class="auth-header-row">
+    <div class="auth-stage">
+      <div class="auth-stage__controls">
         <button
           type="button"
           class="mode-chip mode-chip--login"
@@ -44,95 +36,126 @@
         </button>
       </div>
 
-      <!-- 폼 전환 애니메이션 -->
-      <transition name="slide-fade" mode="out-in">
-        <form
-          v-if="mode === 'login'"
-          key="login"
-          class="auth-form"
-          @submit.prevent="handleLogin"
+      <div class="auth-rotator">
+        <div
+          class="auth-peek auth-peek--register"
+          :class="{ 'auth-peek--visible': mode === 'login' }"
+          aria-hidden="true"
+        ></div>
+        <div
+          class="auth-peek auth-peek--login"
+          :class="{ 'auth-peek--visible': mode === 'register' }"
+          aria-hidden="true"
+        ></div>
+
+        <div
+          class="auth-carousel"
+          :class="[`auth-carousel--${mode}`]"
         >
-          <div class="field">
-            <label for="login-email">아이디</label>
-            <input
-              id="login-email"
-              v-model="loginEmail"
-              type="email"
-              placeholder="이메일을 입력하세요"
-              required
-            />
-          </div>
-          <div class="field">
-            <label for="login-password">비밀번호 (TMDB API Key)</label>
-            <input
-              id="login-password"
-              v-model="loginPassword"
-              type="password"
-              placeholder="TMDB API 키를 입력하세요"
-              required
-            />
-          </div>
+          <section class="auth-panel auth-panel--login">
+            <div
+              class="panel-content"
+              :class="{ 'panel-content--visible': mode === 'login' }"
+            >
+              <div class="panel-eyebrow">LOGIN PANEL</div>
+              <h2 class="panel-title">로그인</h2>
+              <p class="panel-subtitle">
+                TMDB API Key를 사용해 로그인하세요.
+              </p>
 
-          <div class="form-row">
-            <label class="remember-toggle">
-              <input v-model="rememberMe" type="checkbox" />
-              <span>자동 로그인</span>
-            </label>
-          </div>
+              <form class="auth-form" @submit.prevent="handleLogin">
+                <div class="field">
+                  <label for="login-email">아이디</label>
+                  <input
+                    id="login-email"
+                    v-model="loginEmail"
+                    type="email"
+                    placeholder="이메일을 입력하세요"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="login-password">비밀번호 (TMDB API Key)</label>
+                  <input
+                    id="login-password"
+                    v-model="loginPassword"
+                    type="password"
+                    placeholder="TMDB API 키를 입력하세요"
+                    required
+                  />
+                </div>
 
-          <button type="submit" class="cta-button">로그인</button>
-        </form>
+                <div class="form-row">
+                  <label class="remember-toggle">
+                    <input v-model="rememberMe" type="checkbox" />
+                    <span>자동 로그인</span>
+                  </label>
+                </div>
 
-        <form
-          v-else
-          key="register"
-          class="auth-form"
-          @submit.prevent="handleRegister"
-        >
-          <div class="field">
-            <label for="register-email">아이디 (이메일)</label>
-            <input
-              id="register-email"
-              v-model="registerEmail"
-              type="email"
-              placeholder="이메일을 입력하세요"
-              required
-            />
-          </div>
-          <div class="field">
-            <label for="register-password">비밀번호 (TMDB API Key)</label>
-            <input
-              id="register-password"
-              v-model="registerPassword"
-              type="password"
-              placeholder="TMDB API 키를 입력하세요"
-              required
-            />
-          </div>
-          <div class="field">
-            <label for="register-password-confirm">비밀번호 확인</label>
-            <input
-              id="register-password-confirm"
-              v-model="registerPasswordConfirm"
-              type="password"
-              placeholder="다시 한 번 입력하세요"
-              required
-            />
-          </div>
+                <button type="submit" class="cta-button">로그인</button>
+              </form>
+            </div>
+          </section>
 
-          <label class="terms">
-            <input v-model="agreeTerms" type="checkbox" />
-            <span>이용 약관 및 개인정보 제공에 동의합니다.</span>
-          </label>
+          <section class="auth-panel auth-panel--register">
+            <div
+              class="panel-content"
+              :class="{ 'panel-content--visible': mode === 'register' }"
+            >
+              <div class="panel-eyebrow">SIGN UP PANEL</div>
+              <h2 class="panel-title">회원가입</h2>
+              <p class="panel-subtitle">
+                새로운 계정을 등록해보세요.
+              </p>
 
-          <button type="submit" class="cta-button cta-button--signup">
-            회원가입
-          </button>
-        </form>
-      </transition>
+              <form class="auth-form" @submit.prevent="handleRegister">
+                <div class="field">
+                  <label for="register-email">아이디 (이메일)</label>
+                  <input
+                    id="register-email"
+                    v-model="registerEmail"
+                    type="email"
+                    placeholder="이메일을 입력하세요"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="register-password">비밀번호 (TMDB API Key)</label>
+                  <input
+                    id="register-password"
+                    v-model="registerPassword"
+                    type="password"
+                    placeholder="TMDB API 키를 입력하세요"
+                    required
+                  />
+                </div>
+                <div class="field">
+                  <label for="register-password-confirm">비밀번호 확인</label>
+                  <input
+                    id="register-password-confirm"
+                    v-model="registerPasswordConfirm"
+                    type="password"
+                    placeholder="다시 한 번 입력하세요"
+                    required
+                  />
+                </div>
 
-      <p v-if="message" class="auth-message">{{ message }}</p>
+                <label class="terms">
+                  <input v-model="agreeTerms" type="checkbox" />
+                  <span>이용 약관 및 개인정보 제공에 동의합니다.</span>
+                </label>
+
+                <button type="submit" class="cta-button cta-button--signup">
+                  회원가입
+                </button>
+              </form>
+            </div>
+          </section>
+        </div>
+      </div>
     </div>
+
+    <p v-if="message" class="auth-message">{{ message }}</p>
   </div>
 </template>
 
@@ -150,6 +173,44 @@ import {
 const router = useRouter()
 
 const mode = ref<'login' | 'register'>('login')
+
+type StarVariant = 'near' | 'mid' | 'far'
+
+interface StarConfig {
+  id: number
+  variant: StarVariant
+  style: Record<string, string>
+}
+
+const STAR_COUNT = 260
+
+const variantBaseDuration: Record<StarVariant, number> = {
+  near: 35,
+  mid: 55,
+  far: 90,
+}
+
+const stars: StarConfig[] = Array.from({ length: STAR_COUNT }, (_, idx) => {
+  const variant: StarVariant =
+    idx % 3 === 0 ? 'near' : idx % 2 === 0 ? 'mid' : 'far'
+  const jitter = Math.random() * 12 - 6
+  const duration = Math.max(
+    15,
+    variantBaseDuration[variant] + jitter,
+  )
+  const delay = (Math.random() * duration * -1).toFixed(2)
+
+  return {
+    id: idx,
+    variant,
+    style: {
+      top: `${Math.random() * 100}vh`,
+      left: `${Math.random() * 100}vw`,
+      animationDelay: `${delay}s`,
+      animationDuration: `${duration}s`,
+    },
+  }
+})
 
 const loginEmail = ref(getRememberedEmail() ?? '')
 const loginPassword = ref('')
@@ -227,7 +288,7 @@ function handleRegister() {
   position: relative;
 }
 
-/* === 강력한 우주 스타필드 === */
+/* === 별이 흐르는 배경 === */
 .starfield {
   position: fixed;
   inset: 0;
@@ -237,7 +298,6 @@ function handleRegister() {
   pointer-events: none;
 }
 
-/* 공통 별 스타일 */
 .star {
   position: absolute;
   background: white;
@@ -249,15 +309,13 @@ function handleRegister() {
   will-change: transform;
 }
 
-/* 먼 별: 작고 아주 느리게 */
 .star--far {
   width: 1px;
   height: 1px;
   opacity: 0.4;
-  animation-duration: 90s; /* 느리게 */
+  animation-duration: 90s;
 }
 
-/* 중간 별 */
 .star--mid {
   width: 2px;
   height: 2px;
@@ -265,7 +323,6 @@ function handleRegister() {
   animation-duration: 50s;
 }
 
-/* 가까운 별: 약간 더 빠르지만 여전히 느리게 */
 .star--near {
   width: 3px;
   height: 3px;
@@ -273,52 +330,53 @@ function handleRegister() {
   animation-duration: 30s;
 }
 
-/* 👉 살짝 왼쪽으로만 이동하는 애니메이션 */
 @keyframes drift {
   from {
     transform: translate3d(0, 0, 0);
   }
   to {
-    transform: translate3d(-40vw, 0, 0); /* 화면 너비의 40% 정도만 왼쪽으로 */
+    transform: translate3d(-40vw, 0, 0);
   }
 }
 
-
-/* === 카드 === */
-.auth-card {
+/* === 3D 씬 === */
+.auth-stage {
   position: relative;
-  width: min(420px, 100% - 2.5rem);
-  padding: 2.2rem 1.8rem 2.4rem;
-  background: radial-gradient(circle at top left, #070f25 0, #02040c 55%, #02030a 100%);
-  border-radius: 1.8rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 24px 60px rgba(0, 0, 0, 0.9),
-    0 0 0 1px rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(18px);
+  width: min(720px, 100%);
+  padding: 1.8rem 0 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  perspective: 1600px;
+  perspective-origin: 50% 40%;
   z-index: 1;
 }
 
-/* === 상단 LOGIN / 제목 / 회원가입 === */
-.auth-header-row {
+.auth-stage__controls {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  column-gap: 0.75rem;
-  margin-bottom: 2rem;
+  column-gap: 1rem;
+  padding: 0.65rem 1rem;
+  border-radius: 999px;
+  background: rgba(7, 10, 24, 0.75);
+  box-shadow:
+    0 20px 40px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
 }
 
 .auth-title {
   text-align: center;
-  font-size: 1.15rem;
+  font-size: 1.1rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
 }
 
 .mode-chip {
-  position: relative;
   border-radius: 999px;
-  padding: 0.35rem 0.95rem;
+  padding: 0.35rem 1rem;
   border: none;
   font-size: 0.78rem;
   letter-spacing: 0.12em;
@@ -332,12 +390,10 @@ function handleRegister() {
     color 0.2s ease;
 }
 
-/* LOGIN 쪽은 동그란 느낌 */
 .mode-chip--login {
   padding-inline: 0.9rem;
 }
 
-/* 회원가입 버튼은 약간 더 길게 */
 .mode-chip--signup {
   padding-inline: 1.05rem;
 }
@@ -351,7 +407,134 @@ function handleRegister() {
   transform: translateY(-1px);
 }
 
-/* === 폼 === */
+.auth-rotator {
+  position: relative;
+  width: clamp(260px, 64vw, 420px);
+  height: clamp(320px, 50vh, 400px);
+  perspective: inherit;
+}
+
+.auth-peek {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  width: 86%;
+  height: 82%;
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.08) 1px, transparent 1px),
+    radial-gradient(circle at top, rgba(41, 63, 109, 0.5), rgba(12, 13, 41, 0.9));
+  opacity: 0;
+  transform: translateY(-28px) scale(0.94);
+  transition: opacity 0.35s ease;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(0.5px);
+}
+
+.auth-peek--login {
+  background: radial-gradient(circle at top, rgba(106, 48, 244, 0.5), rgba(9, 7, 45, 0.85));
+}
+
+.auth-peek--visible {
+  opacity: 0.35;
+}
+
+.auth-carousel {
+  --panel-depth: 150px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(0.19, 1, 0.22, 1);
+  transform: rotateY(var(--carousel-rotation, 0deg));
+  z-index: 1;
+}
+
+.auth-carousel--login {
+  --carousel-rotation: 0deg;
+}
+
+.auth-carousel--register {
+  --carousel-rotation: 180deg;
+}
+
+.auth-panel {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: min(360px, 96%);
+  min-height: 100%;
+  padding: 1.35rem 1rem 1.8rem;
+  border-radius: 1.65rem;
+  background: radial-gradient(circle at top left, rgba(8, 12, 36, 0.95), rgba(4, 6, 19, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 22px 50px rgba(0, 0, 0, 0.82),
+    0 0 0 1px rgba(0, 0, 0, 0.45);
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  opacity: 0.9;
+  pointer-events: none;
+  will-change: transform;
+  transition: opacity 0.35s ease, filter 0.35s ease, transform 0.35s ease;
+}
+
+.auth-panel--login {
+  transform: translateX(-50%) rotateY(0deg) translateZ(var(--panel-depth));
+}
+
+.auth-panel--register {
+  transform: translateX(-50%) rotateY(180deg) translateZ(var(--panel-depth));
+}
+
+.auth-carousel--login .auth-panel--login,
+.auth-carousel--register .auth-panel--register {
+  opacity: 1;
+  pointer-events: auto;
+  filter: drop-shadow(0 25px 40px rgba(0, 0, 0, 0.7));
+}
+
+.auth-carousel--login .auth-panel--register,
+.auth-carousel--register .auth-panel--login {
+  opacity: 0.1;
+}
+
+.panel-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.4em;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.panel-title {
+  margin: 0.2rem 0 0.3rem;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+}
+
+.panel-subtitle {
+  margin: 0 0 0.95rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.9rem;
+}
+
+.panel-content {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  pointer-events: none;
+}
+
+.panel-content--visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
 .auth-form {
   display: flex;
   flex-direction: column;
@@ -371,13 +554,15 @@ function handleRegister() {
 }
 
 .field input {
-  border-radius: 0.95rem;
+  width: 100%;
+  border-radius: 0.88rem;
   border: 1px solid rgba(110, 148, 210, 0.6);
   background: radial-gradient(circle at top left, #05091a, #030511);
   color: #fff;
-  padding: 0.8rem 1rem;
-  font-size: 0.95rem;
+  padding: 0.55rem 1.2rem;
+  font-size: 0.84rem;
   outline: none;
+  min-height: 2.2rem;
   transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
 }
 
@@ -409,7 +594,8 @@ function handleRegister() {
   color: rgba(255, 255, 255, 0.78);
 }
 
-.remember-toggle input {
+.remember-toggle input,
+.terms input {
   accent-color: #e50914;
 }
 
@@ -421,11 +607,6 @@ function handleRegister() {
   color: rgba(255, 255, 255, 0.78);
 }
 
-.terms input {
-  accent-color: #e50914;
-}
-
-/* === 메인 CTA 버튼 === */
 .cta-button {
   margin-top: 0.75rem;
   width: 100%;
@@ -445,10 +626,6 @@ function handleRegister() {
   transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
-.cta-button--signup {
-  background: linear-gradient(135deg, #a0040c, #e50914, #7b0308);
-}
-
 .cta-button:hover {
   transform: translateY(-1px);
   filter: brightness(1.05);
@@ -457,13 +634,45 @@ function handleRegister() {
     0 0 0 1px rgba(229, 9, 20, 0.6);
 }
 
-/* 메시지 */
 .auth-message {
   margin-top: 1.2rem;
   text-align: center;
   font-size: 0.86rem;
   color: #f5c518;
+  z-index: 1;
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-carousel {
+    transition: none;
+  }
+  .panel-content {
+    transition: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .auth-stage {
+    padding-inline: 1rem;
+  }
+
+  .auth-carousel {
+    --panel-depth: 150px;
+    height: min(460px, 70vh);
+  }
+
+  .auth-panel {
+    width: 96%;
+    padding: 1.7rem 1.25rem 2rem;
+  }
+
+  .form-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.35rem;
+  }
+}
+
 
 /* 폼 전환 애니메이션 그대로 유지 */
 .slide-fade-enter-active,

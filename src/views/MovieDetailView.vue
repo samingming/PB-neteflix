@@ -98,6 +98,7 @@ function handleWishlist(detail: TmdbMovieDetail) {
 }
 
 onMounted(() => {
+  window.scrollTo({ top: 0, behavior: 'auto' })
   void loadMovie()
 })
 </script>

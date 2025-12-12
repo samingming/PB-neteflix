@@ -27,8 +27,10 @@
     <section v-if="viewMode === 'table'" class="panel infinite-view">
       <LoaderSpinner v-if="tableState.loading" />
       <p v-else-if="tableState.error" class="error-text">{{ tableState.error }}</p>
-
       <template v-else>
+        <div class="info-bar">
+          <p>페이지를 넘기며 인기 영화를 카드 형식으로 둘러보세요.</p>
+        </div>
         <div class="movie-grid">
           <MovieCard
             v-for="movie in tableState.movies"
@@ -48,7 +50,7 @@
             :disabled="tableState.page <= 1"
             @click="changeTablePage(tableState.page - 1)"
           >
-            ??
+            이전
           </button>
           <span class="page-info">
             {{ tableState.page }} / {{ tableState.totalPages }}
@@ -59,77 +61,86 @@
             :disabled="tableState.page >= tableState.totalPages"
             @click="changeTablePage(tableState.page + 1)"
           >
-            ??
+            다음
           </button>
         </div>
       </template>
     </section>
 
-    <section v-else class="panel">
-      <p class="info-bar">스크롤을 내리면 자동으로 다음 인기 영화가 이어집니다.</p>
-      <div class="table-wrapper">
-        <table class="movie-table">
-          <thead>
-            <tr>
-              <th>순위</th>
-              <th>포스터</th>
-              <th>제목</th>
-              <th>⭐평점</th>
-              <th>개봉일</th>
-              <th>추천</th>
-              <th>위시리스트</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="(movie, idx) in infiniteState.movies"
-              :key="movie.id"
-              class="row-clickable"
-              @click="toggleRecommendation(movie)"
-            >
-              <td>{{ idx + 1 }}</td>
-              <td>
-                <RouterLink
-                  class="thumb"
-                  :to="`/movies/${movie.id}`"
-                  @click.stop
-                >
-                  <img
-                    v-if="movie.poster_path"
-                    :src="getPosterUrl(movie.poster_path)"
-                    :alt="movie.title"
-                  />
-                  <div v-else class="thumb-placeholder">No Image</div>
-                </RouterLink>
-              </td>
-              <td class="title-cell">{{ movie.title }}</td>
-              <td>{{ movie.vote_average?.toFixed(1) ?? '-' }}</td>
-              <td>{{ movie.release_date ?? '-' }}</td>
-              <td>
-                <span
-                  :class="[
-                    'recommend-indicator',
-                    isRecommended(movie.id) ? 'recommend-indicator--on' : '',
-                  ]"
-                >
-                  {{ isRecommended(movie.id) ? '추천됨' : '추천대기' }}
-                </span>
-              </td>
-              <td>
-                <button
-                  type="button"
-                  class="wishlist-chip"
-                  @click.stop="toggleWishlist(movie)"
-                >
-                  {{ isInWishlist(movie.id) ? '해제' : '담기' }}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <section v-else class="panel table-view">
+      <div class="info-bar">
+        <p>스크롤을 내리면 자동으로 다음 인기 영화가 이어집니다.</p>
       </div>
 
-      <LoaderSpinner v-if="infiniteState.loading" />
+      <div class="infinite-feed">
+        <article
+          v-for="movie in infiniteState.movies"
+          :key="movie.id"
+          class="feed-card"
+        >
+          <RouterLink
+            class="feed-thumb"
+            :to="`/movies/${movie.id}`"
+            @click.stop
+          >
+            <img
+              v-if="movie.poster_path"
+              :src="getPosterUrl(movie.poster_path)"
+              :alt="movie.title"
+              loading="lazy"
+              decoding="async"
+            />
+            <div v-else class="feed-thumb__placeholder">No Image</div>
+          </RouterLink>
+
+          <div class="feed-body">
+            <div class="feed-heading">
+              <h3 class="feed-title">{{ movie.title }}</h3>
+              <span class="feed-score">
+                {{ movie.vote_average?.toFixed(1) ?? '-' }}
+              </span>
+            </div>
+            <p class="feed-meta">
+              <span>{{ movie.release_date ?? '개봉일 정보 없음' }}</span>
+              <span
+                class="recommend-state"
+                :class="{ 'recommend-state--on': isRecommended(movie.id) }"
+              >
+                {{ isRecommended(movie.id) ? '추천됨' : '추천대기' }}
+              </span>
+            </p>
+            <p v-if="movie.overview" class="feed-overview">
+              {{ getOverviewSnippet(movie.overview) }}
+            </p>
+            <div class="feed-actions">
+              <button
+                type="button"
+                class="feed-action-btn"
+                @click.stop="toggleRecommendation(movie)"
+              >
+                {{ isRecommended(movie.id) ? '추천 취소' : '추천하기' }}
+              </button>
+              <button
+                type="button"
+                class="feed-action-btn feed-action-btn--ghost"
+                @click.stop="toggleWishlist(movie)"
+              >
+                {{ isInWishlist(movie.id) ? '위시리스트 해제' : '담기' }}
+              </button>
+            </div>
+          </div>
+
+          <RouterLink
+            class="feed-detail"
+            :to="`/movies/${movie.id}`"
+            @click.stop
+          >
+            상세
+          </RouterLink>
+        </article>
+      </div>
+
+      <LoaderSpinner v-if="infiniteState.loading" class="feed-loader" />
       <p v-else-if="infiniteState.error" class="error-text">{{ infiniteState.error }}</p>
       <p v-else-if="infiniteState.isEnd" class="end-text">
         모든 인기 목록을 확인했습니다!
@@ -197,9 +208,23 @@ const infiniteState = reactive<InfiniteState>({
 })
 
 const showTopButton = ref(false)
+const MIN_INFINITE_LOADING_MS = 450
+let hasLoadedFirstInfinitePage = false
 
 function getPosterUrl(path: string) {
   return `https://image.tmdb.org/t/p/w200${path}`
+}
+
+function getOverviewSnippet(overview?: string) {
+  const text = overview?.trim()
+  if (!text) return ''
+  return text.length > 120 ? `${text.slice(0, 120)}...` : text
+}
+
+function delay(ms: number) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms)
+  })
 }
 
 async function loadTablePage(page: number) {
@@ -229,12 +254,17 @@ async function loadMoreInfinite() {
   infiniteState.loading = true
   infiniteState.error = null
   try {
-    const nextPage = infiniteState.page + (infiniteState.movies.length ? 1 : 0)
-    const res = await fetchPopularMovies(nextPage)
-    infiniteState.page = res.page
-    infiniteState.totalPages = res.total_pages
+    const nextPage = hasLoadedFirstInfinitePage ? infiniteState.page + 1 : 1
+    const [res] = await Promise.all([
+      fetchPopularMovies(nextPage),
+      delay(MIN_INFINITE_LOADING_MS),
+    ])
 
-    if (res.results.length === 0 || res.page >= res.total_pages) {
+    hasLoadedFirstInfinitePage = true
+    infiniteState.page = res.page
+    infiniteState.totalPages = Math.min(res.total_pages, 500)
+
+    if (res.results.length === 0 || res.page >= infiniteState.totalPages) {
       infiniteState.isEnd = true
     }
 
@@ -266,10 +296,11 @@ function onScroll() {
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
   const viewportHeight = window.innerHeight
   const fullHeight = document.documentElement.scrollHeight
+  const preloadGap = Math.max(80, viewportHeight * 0.1)
 
   showTopButton.value = scrollTop > 300
 
-  if (viewMode.value === 'infinite' && scrollTop + viewportHeight >= fullHeight - 200) {
+  if (viewMode.value === 'infinite' && scrollTop + viewportHeight >= fullHeight - preloadGap) {
     void loadMoreInfinite()
   }
 }
@@ -343,102 +374,164 @@ onBeforeUnmount(() => {
   border-color: var(--color-accent);
 }
 
-.table-wrapper {
-  overflow-x: auto;
+.infinite-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
-.movie-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-  min-width: 640px;
+.feed-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 0.9rem;
+  padding: 0.85rem 1rem;
+  border-radius: 1rem;
+  background: rgba(15, 23, 42, 0.78);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  box-shadow: 0 12px 28px rgba(2, 6, 23, 0.5);
 }
 
-.movie-table th,
-.movie-table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid rgba(55, 65, 81, 0.6);
-  text-align: left;
-}
-
-.movie-table th {
-  font-weight: 600;
-  color: #e5e5e5;
-  background: rgba(15, 23, 42, 0.8);
-}
-
-[data-theme='light'] .movie-table th {
-  color: #0f172a;
-  background: rgba(226, 232, 240, 0.9);
-}
-
-.row-clickable {
-  cursor: pointer;
-}
-
-.row-clickable:hover {
-  background: rgba(30, 64, 175, 0.3);
-}
-
-.thumb {
-  display: block;
-  width: 54px;
-  height: 80px;
-  border-radius: 6px;
+.feed-thumb {
+  width: 68px;
+  height: 96px;
+  border-radius: 0.75rem;
   overflow: hidden;
-  background: #111827;
+  background: #0f172a;
+  flex-shrink: 0;
 }
 
-.thumb img {
+.feed-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.thumb-placeholder {
+.feed-thumb__placeholder {
   width: 100%;
   height: 100%;
-  font-size: 0.65rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #9ca3af;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  color: #94a3b8;
 }
 
-.title-cell {
-  max-width: 320px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.feed-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.45rem;
 }
 
-.recommend-indicator {
-  font-size: 0.85rem;
-  color: #9ca3af;
+.feed-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
 }
 
-.recommend-indicator--on {
+.feed-title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.feed-score {
+  padding: 0.12rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid rgba(252, 211, 77, 0.4);
+  color: #facc15;
+  font-size: 0.75rem;
+}
+
+.feed-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+
+.recommend-state {
+  padding: 0.1rem 0.45rem;
+  border-radius: 0.5rem;
+  background: rgba(148, 163, 184, 0.2);
+  color: #cbd5f5;
+}
+
+.recommend-state--on {
+  background: rgba(234, 179, 8, 0.2);
   color: #facc15;
 }
 
-.wishlist-chip {
+.feed-overview {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #cbd5f5;
+  line-height: 1.35;
+}
+
+.feed-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.feed-action-btn {
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: transparent;
-  color: #e5e5e5;
-  padding: 0.2rem 0.8rem;
-  font-size: 0.8rem;
+  border: none;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.78rem;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  background: var(--color-accent);
+  color: #fff;
+  transition: opacity 0.2s ease;
 }
 
-.wishlist-chip:hover {
-  background: rgba(255, 255, 255, 0.1);
+.feed-action-btn--ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-[data-theme='light'] .wishlist-chip {
+.feed-action-btn:hover {
+  opacity: 0.85;
+}
+
+.feed-detail {
+  align-self: center;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  color: #e5e5e5;
+}
+
+.feed-loader {
+  margin-top: 0.5rem;
+}
+
+[data-theme='light'] .feed-card {
+  background: rgba(248, 250, 252, 0.9);
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.15);
+}
+
+[data-theme='light'] .feed-meta {
+  color: #475569;
+}
+
+[data-theme='light'] .feed-overview {
+  color: #1e293b;
+}
+
+[data-theme='light'] .feed-action-btn--ghost {
+  border-color: rgba(15, 23, 42, 0.2);
   color: #0f172a;
-  border-color: rgba(15, 23, 42, 0.3);
+}
+
+[data-theme='light'] .feed-detail {
+  border-color: rgba(15, 23, 42, 0.25);
+  color: #0f172a;
 }
 
 .pagination {
@@ -519,6 +612,17 @@ onBeforeUnmount(() => {
 
   .view-toggle .toggle-btn {
     flex: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .feed-card {
+    grid-template-columns: auto 1fr;
+  }
+
+  .feed-detail {
+    justify-self: flex-start;
+    margin-top: 0.35rem;
   }
 }
 </style>

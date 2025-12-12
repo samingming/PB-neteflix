@@ -19,22 +19,20 @@
         decoding="async"
       />
       <div v-else class="poster-placeholder">No Image</div>
-    </div>
-    <div class="movie-info">
-      <h3 class="title">{{ movie.title }}</h3>
-      <p v-if="overviewText" class="overview">{{ overviewText }}</p>
-      <p v-if="movie.vote_average" class="meta">평점 {{ movie.vote_average.toFixed(1) }}</p>
-      <p v-if="movie.release_date" class="meta">{{ movie.release_date }}</p>
-      <div class="action-row">
-        <button
-          type="button"
-          class="wishlist-btn"
-          :aria-pressed="!!isWishlisted"
-          @click.stop="handleWishlistClick"
-        >
-          {{ isWishlisted ? '위시리스트 해제' : '위시리스트 담기' }}
-        </button>
-        <RouterLink class="detail-link" :to="`/movies/${movie.id}`">상세 보기</RouterLink>
+      <div class="poster-overlay" :class="{ 'poster-overlay--touch': isTouchActive }">
+        <h3 class="overlay-title">{{ movie.title }}</h3>
+        <p v-if="overviewText" class="overlay-overview">{{ overviewText }}</p>
+        <div class="overlay-actions">
+          <button
+            type="button"
+            class="wishlist-btn"
+            :aria-pressed="!!isWishlisted"
+            @click.stop="handleWishlistClick"
+          >
+            {{ isWishlisted ? '위시리스트 해제' : '위시리스트 담기' }}
+          </button>
+          <RouterLink class="detail-link" :to="`/movies/${movie.id}`">상세 보기</RouterLink>
+        </div>
       </div>
     </div>
   </article>
@@ -113,6 +111,7 @@ function handleTouchEnd() {
   overflow: hidden;
   background: #111827;
   aspect-ratio: 2 / 3;
+  position: relative;
 }
 
 .poster-wrap img {
@@ -120,7 +119,7 @@ function handleTouchEnd() {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.25s ease;
+  transition: transform 0.25s ease, filter 0.25s ease;
   will-change: transform;
 }
 
@@ -136,6 +135,39 @@ function handleTouchEnd() {
   letter-spacing: 0.15em;
 }
 
+.poster-overlay {
+  position: absolute;
+  inset: 0;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  background: linear-gradient(180deg, rgba(3, 7, 18, 0) 20%, rgba(3, 7, 18, 0.85) 100%);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+.overlay-title {
+  margin: 0;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.overlay-overview {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #e5e5e5;
+}
+
+.overlay-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
 .movie-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
@@ -147,44 +179,15 @@ function handleTouchEnd() {
 }
 
 .movie-card:hover img {
-  transform: scale(1.05);
+  transform: scale(1.06);
+  filter: brightness(0.85);
 }
 
-.movie-info {
-  margin-top: 0.35rem;
-  font-size: 0.85rem;
-  color: #e5e5e5;
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-[data-theme='light'] .movie-card .movie-info {
-  color: #111827;
-}
-
-.title {
-  font-size: 0.9rem;
-  margin-bottom: 0.1rem;
-}
-
-[data-theme='light'] .movie-card .title {
-  color: #111827;
-}
-
-.overview {
-  font-size: 0.78rem;
-  color: #cbd5f5;
-  line-height: 1.3;
-}
-
-[data-theme='light'] .movie-card .overview {
-  color: #4b5563;
-}
-
-.meta {
-  font-size: 0.75rem;
-  color: #9ca3af;
+.movie-card:hover .poster-overlay,
+.movie-card--touch .poster-overlay {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .movie-card--recommended::after {
@@ -202,13 +205,6 @@ function handleTouchEnd() {
   align-items: center;
   justify-content: center;
   box-shadow: 0 6px 20px rgba(229, 9, 20, 0.35);
-}
-
-.action-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-wrap: wrap;
 }
 
 .wishlist-btn {
@@ -252,6 +248,10 @@ function handleTouchEnd() {
 @media (max-width: 640px) {
   .movie-card {
     min-width: unset;
+  }
+
+  .poster-overlay {
+    padding: 0.75rem;
   }
 }
 </style>
