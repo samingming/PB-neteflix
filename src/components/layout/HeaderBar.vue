@@ -48,31 +48,13 @@
           <span class="head-bar__user-text">{{ userId }}</span>
         </span>
         <button
-<<<<<<< HEAD
-          v-if="!isAuthenticated"
-=======
           v-else
->>>>>>> develop
           type="button"
           class="head-bar__button"
           @click="handleSignIn"
         >
           Sign In
         </button>
-<<<<<<< HEAD
-        <div ref="settingsMenuRef" class="head-bar__display">
-          <button
-            type="button"
-            class="head-bar__button head-bar__button--muted head-bar__display-trigger"
-            aria-haspopup="true"
-            :aria-expanded="isSettingsOpen"
-            @click="toggleSettings"
-          >
-            <FontAwesomeIcon :icon="['fas', 'arrow-down-wide-short']" class="head-bar__button-icon" aria-hidden="true" />
-            <span>Display</span>
-          </button>
-          <div v-if="isSettingsOpen" class="head-bar__display-menu" role="menu">
-=======
         <div class="display-menu-wrapper" :class="{ 'display-menu-wrapper--open': isDisplayMenuOpen }">
           <button
             type="button"
@@ -86,64 +68,9 @@
             <FontAwesomeIcon :icon="['fas', 'chevron-down']" class="display-trigger__icon" aria-hidden="true" />
           </button>
           <div v-if="isDisplayMenuOpen" class="display-menu" role="menu">
->>>>>>> develop
             <button
               v-if="isAuthenticated"
               type="button"
-<<<<<<< HEAD
-              class="head-bar__button head-bar__button--muted head-bar__display-item"
-              :aria-pressed="theme === 'light'"
-              @click="toggleTheme"
-            >
-              <FontAwesomeIcon :icon="themeIcon" class="head-bar__button-icon" aria-hidden="true" />
-              <span>{{ themeLabel }}</span>
-            </button>
-            <div class="display-menu__section" role="group" aria-label="?? ??">
-              <span class="display-menu__label">글자 크기</span>
-              <div class="font-controls">
-                <button
-                  type="button"
-                  class="head-bar__button head-bar__button--muted"
-                  aria-label="글자 크기 축소"
-                  @click="decrease"
-                >
-                  <FontAwesomeIcon :icon="['fas', 'minus']" aria-hidden="true" />
-                  <span class="sr-only">-</span>
-                </button>
-                <span class="font-label">{{ fontScaleLabel }}</span>
-                <button
-                  type="button"
-                  class="head-bar__button head-bar__button--muted"
-                  aria-label="글자 크기 확대"
-                  @click="increase"
-                >
-                  <FontAwesomeIcon :icon="['fas', 'plus']" aria-hidden="true" />
-                  <span class="sr-only">+</span>
-                </button>
-              </div>
-            </div>
-            <button
-              type="button"
-              class="head-bar__button head-bar__button--muted head-bar__display-item"
-              :aria-pressed="isMotionReduced"
-              @click="toggleMotion"
-            >
-              <FontAwesomeIcon :icon="motionIcon" class="head-bar__button-icon" aria-hidden="true" />
-              <span>{{ motionLabel }}</span>
-            </button>
-            <button
-              v-if="isAuthenticated"
-              type="button"
-              class="head-bar__button head-bar__button--ghost head-bar__display-item logout-btn"
-              @click="handleLogout"
-            >
-              <FontAwesomeIcon
-                :icon="['fas', 'right-from-bracket']"
-                class="head-bar__button-icon"
-                aria-hidden="true"
-              />
-              <span>Logout</span>
-=======
               class="display-menu__item"
               role="menuitem"
               @click="handleLogout"
@@ -180,7 +107,6 @@
             >
               <FontAwesomeIcon :icon="motionIcon" aria-hidden="true" />
               <span>{{ motionLabel }}</span>
->>>>>>> develop
             </button>
           </div>
         </div>
@@ -203,8 +129,6 @@ const userId = ref<string | null>(getCurrentUserId())
 const isMenuOpen = ref(false)
 const isDisplayMenuOpen = ref(false)
 const isScrolled = ref(false)
-const isSettingsOpen = ref(false)
-const settingsMenuRef = ref<HTMLElement | null>(null)
 
 const navItems = [
   { to: '/', label: 'Home', icon: ['fas', 'house'] as const },
@@ -232,41 +156,23 @@ watch(
   () => {
     userId.value = getCurrentUserId()
     isMenuOpen.value = false
-<<<<<<< HEAD
-    isSettingsOpen.value = false
-=======
     isDisplayMenuOpen.value = false
->>>>>>> develop
   },
   { immediate: true },
 )
-
-watch(isMenuOpen, (open) => {
-  if (!open) {
-    isSettingsOpen.value = false
-  }
-})
 
 function updateScrollState() {
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
   isScrolled.value = scrollTop > 30
 }
 
-function handleClickOutside(event: MouseEvent) {
-  if (settingsMenuRef.value && !settingsMenuRef.value.contains(event.target as Node)) {
-    isSettingsOpen.value = false
-  }
-}
-
 onMounted(() => {
   updateScrollState()
   window.addEventListener('scroll', updateScrollState, { passive: true })
-  document.addEventListener('click', handleClickOutside)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', updateScrollState)
-  document.removeEventListener('click', handleClickOutside)
 })
 
 function goHome() {
@@ -284,10 +190,6 @@ function toggleDisplayMenu() {
   isDisplayMenuOpen.value = !isDisplayMenuOpen.value
 }
 
-function toggleSettings() {
-  isSettingsOpen.value = !isSettingsOpen.value
-}
-
 function handleSignIn() {
   router.push('/signin')
 }
@@ -295,7 +197,6 @@ function handleSignIn() {
 function handleLogout() {
   logout()
   userId.value = null
-  isSettingsOpen.value = false
   router.push('/signin')
 }
 
@@ -486,46 +387,6 @@ function handleLogout() {
   border-radius: 0.6rem;
 }
 
-.head-bar__display {
-  position: relative;
-}
-
-.head-bar__display-trigger {
-  min-width: 6.5rem;
-  justify-content: center;
-}
-
-.head-bar__display-menu {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 0.5rem);
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  padding: 0.85rem;
-  border-radius: 0.75rem;
-  background: rgba(15, 23, 42, 0.95);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  width: max(230px, 100%);
-  box-shadow: 0 20px 50px rgba(2, 6, 23, 0.55);
-  z-index: 40;
-}
-
-.head-bar__display-item {
-  justify-content: flex-start;
-}
-
-.display-menu__section {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.display-menu__label {
-  font-size: 0.75rem;
-  color: var(--color-muted);
-}
-
 .display-menu-wrapper {
   position: relative;
 }
@@ -691,17 +552,6 @@ function handleLogout() {
     max-width: none;
   }
 
-<<<<<<< HEAD
-  .head-bar__display {
-    width: 100%;
-  }
-
-  .head-bar__display-menu {
-    position: static;
-    width: 100%;
-    margin-top: 0.35rem;
-    box-shadow: none;
-=======
   .display-menu-wrapper {
     width: 100%;
   }
@@ -715,7 +565,6 @@ function handleLogout() {
     position: static;
     width: 100%;
     margin-top: 0.35rem;
->>>>>>> develop
   }
 }
 </style>
