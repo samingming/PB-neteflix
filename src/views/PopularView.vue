@@ -262,10 +262,11 @@ function onScroll() {
   const scrollTop = window.pageYOffset || document.documentElement.scrollTop || 0
   const viewportHeight = window.innerHeight
   const fullHeight = document.documentElement.scrollHeight
+  const preloadGap = Math.max(400, viewportHeight * 0.5)
 
   showTopButton.value = scrollTop > 300
 
-  if (viewMode.value === 'infinite' && scrollTop + viewportHeight >= fullHeight - 200) {
+  if (viewMode.value === 'infinite' && scrollTop + viewportHeight >= fullHeight - preloadGap) {
     void loadMoreInfinite()
   }
 }
