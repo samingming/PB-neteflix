@@ -94,6 +94,13 @@
 
                 <button type="submit" class="cta-button">로그인</button>
               </form>
+
+              <p
+                v-if="message && mode === 'login'"
+                class="auth-message auth-message--inline"
+              >
+                {{ message }}
+              </p>
             </div>
           </section>
 
@@ -149,13 +156,18 @@
                   회원가입
                 </button>
               </form>
+
+              <p
+                v-if="message && mode === 'register'"
+                class="auth-message auth-message--inline"
+              >
+                {{ message }}
+              </p>
             </div>
           </section>
         </div>
       </div>
     </div>
-
-    <p v-if="message" class="auth-message">{{ message }}</p>
   </div>
 </template>
 
@@ -642,6 +654,11 @@ function handleRegister() {
   z-index: 1;
 }
 
+.auth-message--inline {
+  margin-top: 0.75rem;
+  text-align: left;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .auth-carousel {
     transition: none;
@@ -670,6 +687,10 @@ function handleRegister() {
     flex-direction: column;
     align-items: flex-start;
     gap: 0.35rem;
+  }
+
+  .field input {
+    font-size: 1rem;
   }
 }
 

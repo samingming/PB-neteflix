@@ -372,6 +372,25 @@ onBeforeUnmount(() => {
 .toggle-btn.active {
   background: var(--color-accent);
   border-color: var(--color-accent);
+  color: #fff;
+  box-shadow: 0 10px 20px rgba(229, 9, 20, 0.25);
+}
+
+[data-theme='light'] .view-toggle .toggle-btn {
+  border-color: rgba(15, 23, 42, 0.25);
+  color: #1f2937;
+  background: rgba(248, 250, 252, 0.85);
+}
+
+[data-theme='light'] .view-toggle .toggle-btn:hover:not(.active) {
+  background: rgba(15, 23, 42, 0.05);
+}
+
+[data-theme='light'] .view-toggle .toggle-btn.active {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: #fff;
+  box-shadow: 0 12px 22px rgba(229, 9, 20, 0.25);
 }
 
 .infinite-feed {

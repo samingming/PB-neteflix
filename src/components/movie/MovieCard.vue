@@ -232,8 +232,9 @@ function handleTouchEnd() {
 .detail-link {
   align-self: flex-start;
   border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 0.2rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(15, 23, 42, 0.7);
+  padding: 0.25rem 0.8rem;
   font-size: 0.75rem;
   color: #fff;
   transition: background-color 0.2s ease, color 0.2s ease;
@@ -241,8 +242,14 @@ function handleTouchEnd() {
 }
 
 [data-theme='light'] .movie-card .detail-link {
-  color: #111827;
+  background: rgba(248, 250, 252, 0.9);
   border-color: rgba(15, 23, 42, 0.2);
+  color: #111827;
+}
+
+.detail-link:hover {
+  background: var(--color-accent);
+  color: #fff;
 }
 
 @media (max-width: 640px) {

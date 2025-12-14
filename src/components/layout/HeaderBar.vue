@@ -222,6 +222,12 @@ function handleLogout() {
   transform: translateZ(0);
 }
 
+[data-theme='light'] .head-bar {
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(248, 250, 252, 0.65));
+  border-color: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+}
+
 [data-theme='light'] .head-bar--scrolled {
   background: rgba(248, 250, 252, 0.95);
   border-color: rgba(15, 23, 42, 0.2);
@@ -254,6 +260,10 @@ function handleLogout() {
   letter-spacing: 0.1em;
 }
 
+[data-theme='light'] .head-bar__brand span {
+  color: #0f172a;
+}
+
 .head-bar__brand-icon {
   font-size: 1.2rem;
 }
@@ -283,6 +293,14 @@ function handleLogout() {
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
+[data-theme='light'] .head-bar__menu {
+  border-color: rgba(15, 23, 42, 0.18);
+}
+
+[data-theme='light'] .head-bar__menu span {
+  background: #0f172a;
+}
+
 .head-bar__nav {
   display: flex;
   gap: 1.25rem;
@@ -299,6 +317,10 @@ function handleLogout() {
   text-transform: uppercase;
   position: relative;
   will-change: color;
+}
+
+[data-theme='light'] .head-bar__link {
+  color: #1f2937;
 }
 
 .head-bar__link-icon {
@@ -407,6 +429,12 @@ function handleLogout() {
   z-index: 15;
 }
 
+[data-theme='light'] .display-menu {
+  background: rgba(248, 250, 252, 0.98);
+  border-color: rgba(15, 23, 42, 0.12);
+  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.12);
+}
+
 .display-menu__item {
   width: 100%;
   display: inline-flex;
@@ -424,6 +452,14 @@ function handleLogout() {
 
 .display-menu__item:hover {
   background: rgba(148, 163, 184, 0.15);
+}
+
+[data-theme='light'] .display-menu__item {
+  color: #0f172a;
+}
+
+[data-theme='light'] .display-menu__item:hover {
+  background: rgba(15, 23, 42, 0.08);
 }
 
 .display-trigger {
@@ -448,6 +484,11 @@ function handleLogout() {
   border-radius: 0.4rem;
   padding: 0.15rem 0.35rem;
   cursor: pointer;
+}
+
+[data-theme='light'] .font-btn {
+  background: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
 }
 
 .display-menu-wrapper--open .display-trigger {
@@ -488,14 +529,16 @@ function handleLogout() {
   color: #0f172a;
 }
 
-[data-theme='light'] .head-bar__display-menu {
-  background: rgba(248, 250, 252, 0.98);
-  border-color: rgba(15, 23, 42, 0.12);
-  box-shadow: 0 18px 35px rgba(15, 23, 42, 0.12);
-}
-
 [data-theme='light'] .font-label {
   color: rgba(15, 23, 42, 0.7);
+}
+
+@media (max-width: 720px) {
+  [data-theme='light'] .head-bar__nav,
+  [data-theme='light'] .head-bar__actions {
+    background: rgba(248, 250, 252, 0.98);
+    border-color: rgba(15, 23, 42, 0.12);
+  }
 }
 
 @media (max-width: 900px) {

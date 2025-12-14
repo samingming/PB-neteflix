@@ -61,6 +61,15 @@ textarea {
   font-family: inherit;
 }
 
+@media (max-width: 640px) {
+  button,
+  input,
+  select,
+  textarea {
+    font-size: 1rem;
+  }
+}
+
 #app,
 .app-shell {
   min-height: 100vh;
