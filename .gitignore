@@ -25,3 +25,5 @@ dist-ssr
 
 # Legacy submodule copy (kept locally only)
 wsd-movie/
+
+.env
